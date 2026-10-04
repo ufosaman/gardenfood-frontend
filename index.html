@@ -36,7 +36,7 @@ img.food{transition:transform .5s}
 <header class="sticky top-0 z-40 bg-black/85 backdrop-blur-lg border-b border-zinc-800 safe-t">
   <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
     <a href="#top" class="flex items-center gap-2">
-      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full">
+      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100';">
       <span class="font-extrabold text-lg sm:text-xl">Garden <span class="gold-text">Food</span></span>
     </a>
     <nav class="hidden md:flex gap-7 text-sm text-zinc-300">
@@ -66,7 +66,7 @@ img.food{transition:transform .5s}
     <div class="order-1 md:order-2 flex justify-center">
       <div class="relative">
         <div class="absolute inset-0 rounded-full blur-3xl opacity-60" style="background:var(--red)"></div>
-        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full">
+        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300';">
       </div>
     </div>
   </div>
@@ -135,7 +135,14 @@ const BOT_TOKEN = "8825538602:AAH552fGMWG4-DV4L3iGbLYyCNfPEyNpcEE";
 const CHAT_ID = "8757414683";
 
 const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
-const FALLBACK_IMGS = { lavash: U("1626700051175-6818013e1d4f"), burger: U("1568901346375-23c9450c58cd"), sandwich: U("1528735602780-2552fd46c7af"), shaurma: U("1561651823-34feb02250e4"), hotdog: U("1612392062631-94dd858cba88"), snek: U("1573080496219-bb080dd4f877") };
+const FALLBACK_IMGS = { 
+  lavash: U("1626700051175-6818013e1d4f"), 
+  burger: U("1568901346375-23c9450c58cd"), 
+  sandwich: U("1528735602780-2552fd46c7af"), 
+  shaurma: U("1561651823-34feb02250e4"), 
+  hotdog: U("1612392062631-94dd858cba88"), 
+  snek: U("1573080496219-bb080dd4f877") 
+};
 
 const MENU = {
   "Lavash & Pita": { fallback: FALLBACK_IMGS.lavash, list: [{ name: "Lavash STANDART", price: 30000, img: "images/lavash-standart.jpg" }, { name: "Lavash qalampir", price: 32000, img: "images/lavash-qalampir.jpg" }] },
@@ -224,25 +231,23 @@ async function order() {
     // 2. Telegram Bot'ga Inline tugmalar bilan yuborish
     const text = `🍔 <b>Garden Food — Yangi buyurtma! (#${orderId})</b>\n\n${lines.join("\n")}\n\n💰 <b>Jami:</b> ${fmt(total)}\n👤 <b>Ism:</b> ${name}\n📞 <b>Telefon:</b> ${phone}\n📍 <b>Manzil:</b> ${addr}`;
 
-    // index.html ichidagi order() funksiyasining sendMessage qismi:
-
-await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    chat_id: CHAT_ID,
-    text: text,
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "✅ Qabul qilish", callback_data: `${orderId}:accept` },
-          { text: "❌ Bekor qilish", callback_data: `${orderId}:cancel` }
-        ]
-      ]
-    }
-  })
-});
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: text,
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Qabul qilish", callback_data: `${orderId}:accept` },
+              { text: "❌ Bekor qilish", callback_data: `${orderId}:cancel` }
+            ]
+          ]
+        }
+      })
+    });
 
     m.textContent = "✅ Buyurtma qabul qilindi!";
     toggleCart(false);
@@ -259,7 +264,6 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         
         trackStatusElem.textContent = currentStatus;
 
-        // Statusga qarab rang va dizaynni o'zgartirish
         if (currentStatus.includes("Bekor qilindi")) {
           trackStatusElem.className = "text-lg font-bold text-red-500 animate-bounce mt-2";
         } else if (currentStatus.includes("yetkazib berildi")) {
@@ -269,8 +273,6 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         } else {
           trackStatusElem.className = "text-lg font-semibold text-blue-400 mt-2";
         }
-          trackStatusElem.className = "text-lg font-semibold text-yellow-400 mt-2";
-        }
       }
     });
 
@@ -279,7 +281,9 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
   }
 }
 
-renderFilters(); renderGrid(); renderCart();
+renderFilters(); 
+renderGrid(); 
+renderCart();
 </script>
 </body>
 </html>
