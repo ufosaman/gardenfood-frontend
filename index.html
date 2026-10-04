@@ -262,9 +262,13 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         // Statusga qarab rang va dizaynni o'zgartirish
         if (currentStatus.includes("Bekor qilindi")) {
           trackStatusElem.className = "text-lg font-bold text-red-500 animate-bounce mt-2";
-        } else if (currentStatus.includes("Qabul qilindi")) {
-          trackStatusElem.className = "text-xl font-extrabold text-green-400 animate-pulse mt-2";
+        } else if (currentStatus.includes("yetkazib berildi")) {
+          trackStatusElem.className = "text-xl font-extrabold text-green-500 mt-2";
+        } else if (currentStatus.includes("yo'lda") || currentStatus.includes("tayyorlanmoqda")) {
+          trackStatusElem.className = "text-lg font-bold text-yellow-400 animate-pulse mt-2";
         } else {
+          trackStatusElem.className = "text-lg font-semibold text-blue-400 mt-2";
+        }
           trackStatusElem.className = "text-lg font-semibold text-yellow-400 mt-2";
         }
       }
