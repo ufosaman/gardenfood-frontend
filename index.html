@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garden Food — Maza va Sifat Uyg'unligi</title>
+<meta name="theme-color" content="#0a0a0c">
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<style>
+:root{--red:#E52B50;--red2:#DC2626;--gold:#FBBF24;--bg:#0a0a0c;--card:#151519}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.btn{background:linear-gradient(135deg,var(--red),var(--red2));box-shadow:0 8px 20px -8px rgba(229,43,80,.7);transition:.25s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-gold{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#111}
+.chip{border:1px solid #2c2c33;background:var(--card);transition:.25s}
+.chip.on,.chip:hover{background:var(--red);border-color:var(--red)}
+.card{background:var(--card);border:1px solid #25252b;transition:.3s}
+.card:hover{transform:translateY(-6px);border-color:var(--red);box-shadow:0 20px 40px -20px rgba(229,43,80,.5)}
+.card:hover img.food{transform:scale(1.08)}
+img.food{transition:transform .5s}
+.ph{background:linear-gradient(135deg,#3b0d18,#1a1a1f 60%,#3a2c06)}
+.hero{background:linear-gradient(180deg,rgba(10,10,12,.55),var(--bg)),radial-gradient(circle at 85% 15%,rgba(229,43,80,.45),transparent 50%),radial-gradient(circle at 5% 90%,rgba(251,191,36,.22),transparent 45%)}
+.gold-text{background:linear-gradient(90deg,#FBBF24,#F59E0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+#drawer{transition:transform .3s}
+.safe-t{padding-top:env(safe-area-inset-top,0px)}
+.safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
+::-webkit-scrollbar{height:6px;width:6px}::-webkit-scrollbar-thumb{background:#333;border-radius:9px}
+</style>
+</head>
+<body>
+
+<header class="sticky top-0 z-40 bg-black/85 backdrop-blur-lg border-b border-zinc-800 safe-t">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <a href="#top" class="flex items-center gap-2">
+      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full">
+      <span class="font-extrabold text-lg sm:text-xl">Garden <span class="gold-text">Food</span></span>
+    </a>
+    <nav class="hidden md:flex gap-7 text-sm text-zinc-300">
+      <a href="#top" class="hover:text-white">Bosh sahifa</a><a href="#menu" class="hover:text-white">Menyu</a><a href="#contact" class="hover:text-white">Aloqa</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="tel:+998910478780" class="hidden sm:block text-sm font-semibold" style="color:var(--gold)">📞 +998 91 047 87 80</a>
+      <button onclick="toggleCart(true)" class="btn relative rounded-full px-4 py-2 font-semibold text-sm" aria-label="Savatcha">Savatcha
+        <span id="badge" class="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section id="top" class="hero relative overflow-hidden">
+  <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=70" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25" onerror="this.remove()">
+  <div class="relative max-w-6xl mx-auto px-4 py-14 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+    <div class="text-center md:text-left order-2 md:order-1">
+      <span class="inline-block px-4 py-1 rounded-full text-xs font-semibold tracking-wide" style="background:rgba(251,191,36,.15);color:var(--gold)">GARDEN FOOD · FAST-FOOD RESTORANI</span>
+      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">Maza va Sifat <span style="color:var(--red)">Uyg'unligi!</span></h1>
+      <p class="mt-4 text-lg md:text-xl text-zinc-300">Eng mazzali fast-food taomlari Garden Food'da</p>
+      <div class="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
+        <a href="#menu" class="btn rounded-full px-8 py-3 font-bold text-lg">Buyurtma berish</a>
+        <a href="tel:+998910478780" class="btn btn-gold rounded-full px-8 py-3 font-bold text-lg">Qo'ng'iroq qilish</a>
+      </div>
+    </div>
+    <div class="order-1 md:order-2 flex justify-center">
+      <div class="relative">
+        <div class="absolute inset-0 rounded-full blur-3xl opacity-60" style="background:var(--red)"></div>
+        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Buyurtma Holati Vidjeti (Order Tracker) -->
+<section id="tracker-section" class="hidden max-w-3xl mx-auto my-8 px-4">
+  <div class="card rounded-3xl p-6 border-2 border-yellow-500/50 bg-zinc-900/90 text-center shadow-2xl">
+    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Real-time Buyurtma Holati</span>
+    <h3 class="text-xl font-bold mt-1">Buyurtma ID: <span id="track-id" class="text-red-500">#---</span></h3>
+    <div class="my-6 p-4 rounded-2xl bg-black/50 border border-zinc-800">
+      <p id="track-status" class="text-2xl font-extrabold text-yellow-400 animate-pulse">📝 Qabul qilindi</p>
+    </div>
+    <p class="text-xs text-zinc-400">Telegram orqali holat o'zgarganda ushbu oyna avtomatik yangilanadi.</p>
+  </div>
+</section>
+
+<section id="menu" class="max-w-6xl mx-auto px-4 py-14">
+  <div class="text-center mb-8">
+    <h2 class="text-3xl md:text-4xl font-extrabold">Bizning <span class="gold-text">menyu</span></h2>
+    <p class="text-zinc-400 mt-2">Sevimli taomingizni tanlang va savatchaga qo'shing</p>
+  </div>
+  <div id="filters" class="flex gap-2 overflow-x-auto pb-3 md:justify-center md:flex-wrap"></div>
+  <div id="grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mt-6"></div>
+</section>
+
+<section id="contact" class="border-t border-zinc-800 bg-zinc-950">
+  <div class="max-w-6xl mx-auto px-4 py-14 text-center">
+    <h2 class="text-3xl font-extrabold mb-8">Aloqa va <span class="gold-text">manzil</span></h2>
+    <p class="text-zinc-300">📞 <a href="tel:+998910478780" style="color:var(--gold)">+998 91 047 87 80</a> | Ish vaqti: 24/7</p>
+  </div>
+</section>
+
+<div id="overlay" onclick="toggleCart(false)" class="fixed inset-0 bg-black/75 z-40 hidden"></div>
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] z-50 bg-zinc-950 border-l border-zinc-800 flex flex-col translate-x-full">
+  <div class="p-4 flex justify-between items-center border-b border-zinc-800 safe-t">
+    <h3 class="text-xl font-bold">Savatcha</h3>
+    <button onclick="toggleCart(false)" class="text-2xl px-2">✕</button>
+  </div>
+  <div id="items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+  <div class="p-4 border-t border-zinc-800 space-y-2 safe-b">
+    <div class="flex justify-between text-lg font-bold"><span>Jami:</span><span id="total" style="color:var(--gold)">0 so'm</span></div>
+    <input id="name" placeholder="Ismingiz" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500">
+    <input id="phone" type="tel" placeholder="Telefon: +998 ..." class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500">
+    <textarea id="addr" rows="2" placeholder="Yetkazib berish manzili" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500"></textarea>
+    <button onclick="order()" class="btn w-full rounded-xl py-3 font-bold">✈️ Buyurtma berish</button>
+    <p id="msg" class="text-sm text-center text-yellow-300 min-h-[1.25rem]"></p>
+  </div>
+</aside>
+
+<script>
+// Firebase Sozlamalari
+const firebaseConfig = {
+  apiKey: "AIzaSyBxCJ7wtW3CfcpJZ7KmfJy8ylum_Bi4DWs",
+  authDomain: "gardenfoodsam.firebaseapp.com",
+  databaseURL: "https://gardenfoodsam-default-rtdb.firebaseio.com",
+  projectId: "gardenfoodsam",
+  storageBucket: "gardenfoodsam.firebasestorage.app",
+  messagingSenderId: "101369630512",
+  appId: "1:101369630512:web:6972dcbb5d03824ac482f5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const BOT_TOKEN = "8825538602:AAH552fGMWG4-DV4L3iGbLYyCNfPEyNpcEE";
+const CHAT_ID = "8757414683";
+
+const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
+const FALLBACK_IMGS = { lavash: U("1626700051175-6818013e1d4f"), burger: U("1568901346375-23c9450c58cd"), sandwich: U("1528735602780-2552fd46c7af"), shaurma: U("1561651823-34feb02250e4"), hotdog: U("1612392062631-94dd858cba88"), snek: U("1573080496219-bb080dd4f877") };
+
+const MENU = {
+  "Lavash & Pita": { fallback: FALLBACK_IMGS.lavash, list: [{ name: "Lavash STANDART", price: 30000, img: "images/lavash-standart.jpg" }, { name: "Lavash qalampir", price: 32000, img: "images/lavash-qalampir.jpg" }] },
+  "Burgerlar": { fallback: FALLBACK_IMGS.burger, list: [{ name: "Gamburger", price: 28000, img: "images/gamburger.jpg" }, { name: "Cheeseburger", price: 30000, img: "images/cheeseburger.jpg" }] }
+};
+
+const items = []; let uid = 0;
+for (const [cat, c] of Object.entries(MENU)) {
+  c.list.forEach(item => items.push({ id: uid++, cat, name: item.name, price: item.price, img: item.img, fallback: c.fallback }));
+}
+
+const cart = {}; let active = "Hamma taomlar";
+const fmt = n => n.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " so'm";
+const $ = s => document.getElementById(s);
+
+function renderFilters() {
+  $("filters").innerHTML = ["Hamma taomlar", ...Object.keys(MENU)].map(c => `<button data-c="${c}" class="chip whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold ${c === active ? "on" : ""}">${c}</button>`).join("");
+  $("filters").querySelectorAll("button").forEach(b => b.onclick = () => { active = b.dataset.c; renderFilters(); renderGrid(); });
+}
+
+function renderGrid() {
+  $("grid").innerHTML = items.filter(i => active === "Hamma taomlar" || i.cat === active).map(i => `
+    <article class="card rounded-3xl overflow-hidden flex flex-col">
+      <div class="ph relative aspect-[4/3] overflow-hidden flex items-center justify-center p-3 text-center">
+        <span class="font-extrabold text-lg text-white/70">${i.name}</span>
+        <img src="${i.img}" alt="${i.name}" class="food absolute inset-0 w-full h-full object-cover" onerror="this.onerror=null; this.src='${i.fallback}';">
+      </div>
+      <div class="p-3 sm:p-5 flex flex-col flex-1">
+        <h3 class="font-bold text-base sm:text-lg leading-tight">${i.name}</h3>
+        <p class="mt-1 text-lg sm:text-xl font-extrabold" style="color:var(--gold)">${fmt(i.price)}</p>
+        <button onclick="add(${i.id})" class="btn mt-auto rounded-xl py-2.5 mt-4 text-sm font-semibold">Savatga qo'shish</button>
+      </div>
+    </article>`).join("");
+}
+
+function add(i) { cart[i] = (cart[i] || 0) + 1; renderCart(); }
+function chg(i, d) { cart[i] += d; if (cart[i] <= 0) delete cart[i]; renderCart(); }
+function del(i) { delete cart[i]; renderCart(); }
+
+function renderCart() {
+  const ids = Object.keys(cart); let total = 0, count = 0;
+  $("items").innerHTML = ids.length ? ids.map(k => {
+    const it = items[k], q = cart[k]; total += it.price * q; count += q;
+    return `<div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-2">
+      <div class="flex-1 min-w-0"><p class="font-semibold text-sm truncate">${it.name}</p><p class="text-xs text-zinc-400">${fmt(it.price * q)}</p></div>
+      <div class="flex items-center gap-1.5">
+        <button onclick="chg(${k},-1)" class="w-7 h-7 rounded-full bg-zinc-700">−</button><span class="w-5 text-center text-sm">${q}</span>
+        <button onclick="chg(${k},1)" class="w-7 h-7 rounded-full bg-zinc-700">+</button>
+        <button onclick="del(${k})" class="ml-1 text-red-400">🗑</button>
+      </div></div>`;
+  }).join("") : `<p class="text-center text-zinc-500 mt-10">Savatcha bo'sh</p>`;
+  $("badge").textContent = count; $("total").textContent = fmt(total);
+}
+
+function toggleCart(o) {
+  $("drawer").classList.toggle("translate-x-full", !o);
+  $("overlay").classList.toggle("hidden", !o);
+}
+
+async function order() {
+  const ids = Object.keys(cart), m = $("msg");
+  if (!ids.length) { m.textContent = "Savatcha bo'sh!"; return; }
+  
+  const name = $("name").value.trim(), phone = $("phone").value.trim(), addr = $("addr").value.trim();
+  if (!name || !phone || !addr) { m.textContent = "Ma'lumotlarni to'liq kiriting!"; return; }
+
+  const orderId = "GF-" + Math.floor(1000 + Math.random() * 9000);
+  let total = 0;
+  const lines = ids.map((k, n) => { 
+    const it = items[k], q = cart[k]; 
+    total += it.price * q; 
+    return `${n + 1}. ${it.name} × ${q} = ${fmt(it.price * q)}`; 
+  });
+
+  m.textContent = "Yuborilmoqda...";
+
+  try {
+    // 1. Firebase bazasiga buyurtmani saqlash
+    await db.ref("orders/" + orderId).set({
+      id: orderId,
+      name, phone, addr, total,
+      status: "📝 Qabul qilindi",
+      time: Date.now()
+    });
+
+    // 2. Telegram Bot'ga Inline tugmalar bilan yuborish
+    const text = `🍔 <b>Garden Food — Yangi buyurtma! (#${orderId})</b>\n\n${lines.join("\n")}\n\n💰 <b>Jami:</b> ${fmt(total)}\n👤 <b>Ism:</b> ${name}\n📞 <b>Telefon:</b> ${phone}\n📍 <b>Manzil:</b> ${addr}`;
+
+    // index.html ichidagi order() funksiyasining sendMessage qismi:
+
+await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    chat_id: CHAT_ID,
+    text: text,
+    parse_mode: "HTML",
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: "✅ Qabul qilish", callback_data: `${orderId}:accept` },
+          { text: "❌ Bekor qilish", callback_data: `${orderId}:cancel` }
+        ]
+      ]
+    }
+  })
+});
+
+    m.textContent = "✅ Buyurtma qabul qilindi!";
+    toggleCart(false);
+
+    // 3. Ekranda Order Tracking oynasini ko'rsatish va Real-time eshitish
+    $("tracker-section").classList.remove("hidden");
+    $("track-id").textContent = "#" + orderId;
+    $("tracker-section").scrollIntoView({ behavior: "smooth" });
+
+    db.ref("orders/" + orderId + "/status").on("value", snapshot => {
+      if (snapshot.exists()) {
+        const currentStatus = snapshot.val();
+        const trackStatusElem = $("track-status");
+        
+        trackStatusElem.textContent = currentStatus;
+
+        // Statusga qarab rang va dizaynni o'zgartirish
+        if (currentStatus.includes("Bekor qilindi")) {
+          trackStatusElem.className = "text-lg font-bold text-red-500 animate-bounce mt-2";
+        } else if (currentStatus.includes("Qabul qilindi")) {
+          trackStatusElem.className = "text-xl font-extrabold text-green-400 animate-pulse mt-2";
+        } else {
+          trackStatusElem.className = "text-lg font-semibold text-yellow-400 mt-2";
+        }
+      }
+    });
+
+  } catch (err) {
+    m.textContent = "❌ Xatolik yuz berdi.";
+  }
+}
+
+renderFilters(); renderGrid(); renderCart();
+</script>
+</body>
+</html>
