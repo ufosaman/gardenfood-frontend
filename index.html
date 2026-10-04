@@ -131,9 +131,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const BOT_TOKEN = "8825538602:AAH552fGMWG4-DV4L3iGbLYyCNfPEyNpcEE";
-const CHAT_ID = "8757414683";
-
 const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
 const FALLBACK_IMGS = { 
   lavash: U("1626700051175-6818013e1d4f"), 
@@ -220,7 +217,7 @@ async function order() {
   m.textContent = "Yuborilmoqda...";
 
   try {
-    // 1. Firebase bazasiga buyurtmani saqlash
+    // 1. Firebase bazasiga saqlash
     await db.ref("orders/" + orderId).set({
       id: orderId,
       name, phone, addr, total,
@@ -228,31 +225,19 @@ async function order() {
       time: Date.now()
     });
 
-    // 2. Telegram Bot'ga Inline tugmalar bilan yuborish
     const text = `🍔 <b>Garden Food — Yangi buyurtma! (#${orderId})</b>\n\n${lines.join("\n")}\n\n💰 <b>Jami:</b> ${fmt(total)}\n👤 <b>Ism:</b> ${name}\n📞 <b>Telefon:</b> ${phone}\n📍 <b>Manzil:</b> ${addr}`;
 
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    // 2. Telegram'ga backend orqali yuborish (Token ishlatilmaydi, xavfsiz)
+    await fetch("https://gardenfood-backend.onrender.com/api/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: text,
-        parse_mode: "HTML",
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: "✅ Qabul qilish", callback_data: `${orderId}:accept` },
-              { text: "❌ Bekor qilish", callback_data: `${orderId}:cancel` }
-            ]
-          ]
-        }
-      })
+      body: JSON.stringify({ orderId, text })
     });
 
     m.textContent = "✅ Buyurtma qabul qilindi!";
     toggleCart(false);
 
-    // 3. Ekranda Order Tracking oynasini ko'rsatish va Real-time eshitish
+    // 3. Tracking oynasini ko'rsatish
     $("tracker-section").classList.remove("hidden");
     $("track-id").textContent = "#" + orderId;
     $("tracker-section").scrollIntoView({ behavior: "smooth" });
