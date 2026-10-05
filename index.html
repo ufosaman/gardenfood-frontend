@@ -36,7 +36,7 @@ img.food{transition:transform .5s}
 <header class="sticky top-0 z-40 bg-black/85 backdrop-blur-lg border-b border-zinc-800 safe-t">
   <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
     <a href="#top" class="flex items-center gap-2">
-      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100'">
+      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full">
       <span class="font-extrabold text-lg sm:text-xl">Garden <span class="gold-text">Food</span></span>
     </a>
     <nav class="hidden md:flex gap-7 text-sm text-zinc-300">
@@ -66,7 +66,7 @@ img.food{transition:transform .5s}
     <div class="order-1 md:order-2 flex justify-center">
       <div class="relative">
         <div class="absolute inset-0 rounded-full blur-3xl opacity-60" style="background:var(--red)"></div>
-        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300'">
+        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full">
       </div>
     </div>
   </div>
@@ -78,7 +78,7 @@ img.food{transition:transform .5s}
     <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Real-time Buyurtma Holati</span>
     <h3 class="text-xl font-bold mt-1">Buyurtma ID: <span id="track-id" class="text-red-500">#---</span></h3>
     <div class="my-6 p-4 rounded-2xl bg-black/50 border border-zinc-800">
-      <p id="track-status" class="text-2xl font-extrabold text-yellow-400 animate-pulse">📥 Yangi buyurtma</p>
+      <p id="track-status" class="text-2xl font-extrabold text-yellow-400 animate-pulse">📝 Qabul qilindi</p>
     </div>
     <p class="text-xs text-zinc-400">Telegram orqali holat o'zgarganda ushbu oyna avtomatik yangilanadi.</p>
   </div>
@@ -100,70 +100,4 @@ img.food{transition:transform .5s}
   </div>
 </section>
 
-<div id="overlay" onclick="toggleCart(false)" class="fixed inset-0 bg-black/75 z-40 hidden"></div>
-<aside id="drawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] z-50 bg-zinc-950 border-l border-zinc-800 flex flex-col translate-x-full">
-  <div class="p-4 flex justify-between items-center border-b border-zinc-800 safe-t">
-    <h3 class="text-xl font-bold">Savatcha</h3>
-    <button onclick="toggleCart(false)" class="text-2xl px-2">✕</button>
-  </div>
-  <div id="items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-  <div class="p-4 border-t border-zinc-800 space-y-2 safe-b">
-    <div class="flex justify-between text-lg font-bold"><span>Jami:</span><span id="total" style="color:var(--gold)">0 so'm</span></div>
-    <input id="name" placeholder="Ismingiz" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
-    <input id="phone" type="tel" placeholder="Telefon: 998901234567" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
-    <textarea id="addr" rows="2" placeholder="Yetkazib berish manzili" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white"></textarea>
-    <button onclick="startOrderProcess()" class="btn w-full rounded-xl py-3 font-bold">✈️ Buyurtma berish</button>
-    <p id="msg" class="text-sm text-center text-yellow-300 min-h-[1.25rem]"></p>
-  </div>
-</aside>
-
-<!-- OTP TASDIQLASH MODAL OYNASI -->
-<div id="otpModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
-  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-sm text-center relative shadow-2xl">
-    <button onclick="closeOtpModal()" class="absolute top-4 right-4 text-zinc-400 text-xl">✕</button>
-    <div class="w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">🔐</div>
-    <h3 class="text-lg font-bold text-white">Telefonni tasdiqlash</h3>
-    <p class="text-xs text-zinc-400 mt-1">Buyurtma berish va uning holatini kuzatib borishingiz uchun tasdiqlash kodi yuboriladi.</p>
-    
-    <div id="otpStepPhone" class="mt-4">
-      <button onclick="sendOTPCode()" class="btn w-full rounded-xl py-2.5 font-bold text-sm">SMS/Telegram Kod Olish</button>
-    </div>
-
-    <div id="otpStepCode" class="mt-4 hidden">
-      <input id="otpCodeInput" type="text" maxlength="6" placeholder="6 xonali kod" class="w-full text-center text-xl tracking-widest rounded-xl bg-black border border-zinc-700 py-2.5 outline-none focus:border-red-500 mb-3 text-white">
-      <button onclick="verifyOTPCode()" class="btn btn-gold w-full rounded-xl py-2.5 font-bold text-sm">Tasdiqlash va Yuborish</button>
-    </div>
-    <p id="otpMsg" class="text-xs text-yellow-400 mt-3 min-h-[1rem]"></p>
-  </div>
-</div>
-
-<script>
-// Firebase Sozlamalari
-const firebaseConfig = {
-  apiKey: "AIzaSyBxCJ7wtW3CfcpJZ7KmfJy8ylum_Bi4DWs",
-  authDomain: "gardenfoodsam.firebaseapp.com",
-  databaseURL: "https://gardenfoodsam-default-rtdb.firebaseio.com",
-  projectId: "gardenfoodsam",
-  storageBucket: "gardenfoodsam.firebasestorage.app",
-  messagingSenderId: "101369630512",
-  appId: "1:101369630512:web:6972dcbb5d03824ac482f5"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const BACKEND_URL = "https://gardenfood-backend.onrender.com"; // Render backend URL
-
-const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
-const FALLBACK_IMGS = { lavash: U("1626700051175-6818013e1d4f"), burger: U("1568901346375-23c9450c58cd"), sandwich: U("1528735602780-2552fd46c7af"), shaurma: U("1561651823-34feb02250e4"), hotdog: U("1612392062631-94dd858cba88"), snek: U("1573080496219-bb080dd4f877") };
-
-const MENU = {
-  "Lavash & Pita": { fallback: FALLBACK_IMGS.lavash, list: [{ name: "Lavash STANDART", price: 30000, img: "images/lavash-standart.jpg" }, { name: "Lavash qalampir", price: 32000, img: "images/lavash-qalampir.jpg" }] },
-  "Burgerlar": { fallback: FALLBACK_IMGS.burger, list: [{ name: "Gamburger", price: 28000, img: "images/gamburger.jpg" }, { name: "Cheeseburger", price: 30000, img: "images/cheeseburger.jpg" }] }
-};
-
-const items = []; let uid = 0;
-for (const [cat, c] of Object.entries(MENU)) {
-  c.list.forEach(item => items.push({ id: uid++, cat, name: item.name, price: item.price, img: item.img, fallback: c.fallback }));
-}
-
-const cart = {}; let active = "Hamma ta
+<div id="overlay" onclick="toggleCart(false)" class
