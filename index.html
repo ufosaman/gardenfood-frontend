@@ -1,188 +1,169 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garden Food - Onlayn Buyurtma</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f8; color: #333; padding-bottom: 50px; }
-        header { background-color: #27ae60; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        h2 { margin-bottom: 15px; color: #2c3e50; font-size: 1.2rem; }
-        input, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
-        button { background-color: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background-color: #219150; }
-        .order-card { background: #fafafa; border: 1px solid #eee; border-left: 5px solid #27ae60; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
-        .status-badge { display: inline-block; background: #27ae60; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-top: 8px; }
-        .status-canceled { background: #e74c3c !important; }
-        
-        /* Modal Style */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.3s; }
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
-        .hidden { display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garden Food — Maza va Sifat Uyg'unligi</title>
+<meta name="theme-color" content="#0a0a0c">
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<style>
+:root{--red:#E52B50;--red2:#DC2626;--gold:#FBBF24;--bg:#0a0a0c;--card:#151519}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.btn{background:linear-gradient(135deg,var(--red),var(--red2));box-shadow:0 8px 20px -8px rgba(229,43,80,.7);transition:.25s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-gold{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#111}
+.chip{border:1px solid #2c2c33;background:var(--card);transition:.25s}
+.chip.on,.chip:hover{background:var(--red);border-color:var(--red)}
+.card{background:var(--card);border:1px solid #25252b;transition:.3s}
+.card:hover{transform:translateY(-6px);border-color:var(--red);box-shadow:0 20px 40px -20px rgba(229,43,80,.5)}
+.card:hover img.food{transform:scale(1.08)}
+img.food{transition:transform .5s}
+.ph{background:linear-gradient(135deg,#3b0d18,#1a1a1f 60%,#3a2c06)}
+.hero{background:linear-gradient(180deg,rgba(10,10,12,.55),var(--bg)),radial-gradient(circle at 85% 15%,rgba(229,43,80,.45),transparent 50%),radial-gradient(circle at 5% 90%,rgba(251,191,36,.22),transparent 45%)}
+.gold-text{background:linear-gradient(90deg,#FBBF24,#F59E0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+#drawer,#otpModal{transition:all .3s ease-in-out}
+.safe-t{padding-top:env(safe-area-inset-top,0px)}
+.safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
+::-webkit-scrollbar{height:6px;width:6px}::-webkit-scrollbar-thumb{background:#333;border-radius:9px}
+</style>
 </head>
 <body>
 
-<header>
-    <h1>🌱 Garden Food</h1>
-    <div id="userPhoneDisplay" style="font-size:0.9rem;">📱 Kirilmagan</div>
+<header class="sticky top-0 z-40 bg-black/85 backdrop-blur-lg border-b border-zinc-800 safe-t">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <a href="#top" class="flex items-center gap-2">
+      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100'">
+      <span class="font-extrabold text-lg sm:text-xl">Garden <span class="gold-text">Food</span></span>
+    </a>
+    <nav class="hidden md:flex gap-7 text-sm text-zinc-300">
+      <a href="#top" class="hover:text-white">Bosh sahifa</a><a href="#menu" class="hover:text-white">Menyu</a><a href="#contact" class="hover:text-white">Aloqa</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="tel:+998910478780" class="hidden sm:block text-sm font-semibold" style="color:var(--gold)">📞 +998 91 047 87 80</a>
+      <button onclick="toggleCart(true)" class="btn relative rounded-full px-4 py-2 font-semibold text-sm" aria-label="Savatcha">Savatcha
+        <span id="badge" class="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
 </header>
 
-<div class="container">
-    <!-- BUYURTMA BERISH -->
-    <div class="card">
-        <h2>🍔 Buyurtma Rasmiylashtirish</h2>
-        <input type="text" id="cartItems" placeholder="Masalan: 2x Lavash, 1x Coca-Cola 1.5L">
-        <button onclick="startOrderProcess()">Buyurtma berish</button>
+<section id="top" class="hero relative overflow-hidden">
+  <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=70" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25" onerror="this.remove()">
+  <div class="relative max-w-6xl mx-auto px-4 py-14 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+    <div class="text-center md:text-left order-2 md:order-1">
+      <span class="inline-block px-4 py-1 rounded-full text-xs font-semibold tracking-wide" style="background:rgba(251,191,36,.15);color:var(--gold)">GARDEN FOOD · FAST-FOOD RESTORANI</span>
+      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">Maza va Sifat <span style="color:var(--red)">Uyg'unligi!</span></h1>
+      <p class="mt-4 text-lg md:text-xl text-zinc-300">Eng mazzali fast-food taomlari Garden Food'da</p>
+      <div class="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
+        <a href="#menu" class="btn rounded-full px-8 py-3 font-bold text-lg">Buyurtma berish</a>
+        <a href="tel:+998910478780" class="btn btn-gold rounded-full px-8 py-3 font-bold text-lg">Qo'ng'iroq qilish</a>
+      </div>
+    </div>
+    <div class="order-1 md:order-2 flex justify-center">
+      <div class="relative">
+        <div class="absolute inset-0 rounded-full blur-3xl opacity-60" style="background:var(--red)"></div>
+        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Buyurtma Holati Vidjeti (Order Tracker) -->
+<section id="tracker-section" class="hidden max-w-3xl mx-auto my-8 px-4">
+  <div class="card rounded-3xl p-6 border-2 border-yellow-500/50 bg-zinc-900/90 text-center shadow-2xl">
+    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Real-time Buyurtma Holati</span>
+    <h3 class="text-xl font-bold mt-1">Buyurtma ID: <span id="track-id" class="text-red-500">#---</span></h3>
+    <div class="my-6 p-4 rounded-2xl bg-black/50 border border-zinc-800">
+      <p id="track-status" class="text-2xl font-extrabold text-yellow-400 animate-pulse">📥 Yangi buyurtma</p>
+    </div>
+    <p class="text-xs text-zinc-400">Telegram orqali holat o'zgarganda ushbu oyna avtomatik yangilanadi.</p>
+  </div>
+</section>
+
+<section id="menu" class="max-w-6xl mx-auto px-4 py-14">
+  <div class="text-center mb-8">
+    <h2 class="text-3xl md:text-4xl font-extrabold">Bizning <span class="gold-text">menyu</span></h2>
+    <p class="text-zinc-400 mt-2">Sevimli taomingizni tanlang va savatchaga qo'shing</p>
+  </div>
+  <div id="filters" class="flex gap-2 overflow-x-auto pb-3 md:justify-center md:flex-wrap"></div>
+  <div id="grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mt-6"></div>
+</section>
+
+<section id="contact" class="border-t border-zinc-800 bg-zinc-950">
+  <div class="max-w-6xl mx-auto px-4 py-14 text-center">
+    <h2 class="text-3xl font-extrabold mb-8">Aloqa va <span class="gold-text">manzil</span></h2>
+    <p class="text-zinc-300">📞 <a href="tel:+998910478780" style="color:var(--gold)">+998 91 047 87 80</a> | Ish vaqti: 24/7</p>
+  </div>
+</section>
+
+<div id="overlay" onclick="toggleCart(false)" class="fixed inset-0 bg-black/75 z-40 hidden"></div>
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] z-50 bg-zinc-950 border-l border-zinc-800 flex flex-col translate-x-full">
+  <div class="p-4 flex justify-between items-center border-b border-zinc-800 safe-t">
+    <h3 class="text-xl font-bold">Savatcha</h3>
+    <button onclick="toggleCart(false)" class="text-2xl px-2">✕</button>
+  </div>
+  <div id="items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+  <div class="p-4 border-t border-zinc-800 space-y-2 safe-b">
+    <div class="flex justify-between text-lg font-bold"><span>Jami:</span><span id="total" style="color:var(--gold)">0 so'm</span></div>
+    <input id="name" placeholder="Ismingiz" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
+    <input id="phone" type="tel" placeholder="Telefon: 998901234567" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
+    <textarea id="addr" rows="2" placeholder="Yetkazib berish manzili" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white"></textarea>
+    <button onclick="startOrderProcess()" class="btn w-full rounded-xl py-3 font-bold">✈️ Buyurtma berish</button>
+    <p id="msg" class="text-sm text-center text-yellow-300 min-h-[1.25rem]"></p>
+  </div>
+</aside>
+
+<!-- OTP TASDIQLASH MODAL OYNASI -->
+<div id="otpModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden">
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-sm text-center relative shadow-2xl">
+    <button onclick="closeOtpModal()" class="absolute top-4 right-4 text-zinc-400 text-xl">✕</button>
+    <div class="w-12 h-12 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">🔐</div>
+    <h3 class="text-lg font-bold text-white">Telefonni tasdiqlash</h3>
+    <p class="text-xs text-zinc-400 mt-1">Buyurtma berish va uning holatini kuzatib borishingiz uchun tasdiqlash kodi yuboriladi.</p>
+    
+    <div id="otpStepPhone" class="mt-4">
+      <button onclick="sendOTPCode()" class="btn w-full rounded-xl py-2.5 font-bold text-sm">SMS/Telegram Kod Olish</button>
     </div>
 
-    <!-- JONLI BUYURTMALAR STATUSI -->
-    <div class="card">
-        <h2>🔄 Buyurtmalaringiz Holati (Real-time)</h2>
-        <div id="activeOrdersList">Buyurtmalar mavjud emas.</div>
+    <div id="otpStepCode" class="mt-4 hidden">
+      <input id="otpCodeInput" type="text" maxlength="6" placeholder="6 xonali kod" class="w-full text-center text-xl tracking-widest rounded-xl bg-black border border-zinc-700 py-2.5 outline-none focus:border-red-500 mb-3 text-white">
+      <button onclick="verifyOTPCode()" class="btn btn-gold w-full rounded-xl py-2.5 font-bold text-sm">Tasdiqlash va Yuborish</button>
     </div>
-</div>
-
-<!-- OTP MODAL OYNASI -->
-<div class="modal-overlay" id="otpModal">
-    <div class="modal">
-        <h3 id="modalTitle">Telefon raqamingiz</h3>
-        <p style="font-size:0.85rem; color:#666; margin-top:5px;">Buyurtma holatini kuzatib borishingiz uchun tasdiqlash kodi yuboriladi.</p>
-        
-        <div id="stepPhone">
-            <input type="text" id="inputPhone" placeholder="998901234567" value="998">
-            <button onclick="requestOTP()">SMS Kod Olish</button>
-        </div>
-
-        <div id="stepCode" class="hidden">
-            <input type="text" id="inputCode" placeholder="6 xonali tasdiqlash kodi">
-            <button onclick="confirmOTP()">Tasdiqlash va Buyurtma berish</button>
-        </div>
-    </div>
+    <p id="otpMsg" class="text-xs text-yellow-400 mt-3 min-h-[1rem]"></p>
+  </div>
 </div>
 
 <script>
-    const BACKEND_URL = "https://gardenfood-backend.onrender.com"; // O'zingizning Render domeningizni kiriting
-    let savedPhone = localStorage.getItem("gf_phone") || "";
-    let pendingOrderText = "";
+// Firebase Sozlamalari
+const firebaseConfig = {
+  apiKey: "AIzaSyBxCJ7wtW3CfcpJZ7KmfJy8ylum_Bi4DWs",
+  authDomain: "gardenfoodsam.firebaseapp.com",
+  databaseURL: "https://gardenfoodsam-default-rtdb.firebaseio.com",
+  projectId: "gardenfoodsam",
+  storageBucket: "gardenfoodsam.firebasestorage.app",
+  messagingSenderId: "101369630512",
+  appId: "1:101369630512:web:6972dcbb5d03824ac482f5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    window.onload = function() {
-        if (savedPhone) {
-            document.getElementById("userPhoneDisplay").innerText = "📱 " + savedPhone;
-            fetchLiveOrders();
-            setInterval(fetchLiveOrders, 8000); // Har 8 soniyada Telegram'dagi yangilanishni oladi
-        }
-    };
+const BACKEND_URL = "https://gardenfood-backend.onrender.com"; // Render backend URL
 
-    function startOrderProcess() {
-        const text = document.getElementById("cartItems").value.trim();
-        if (!text) return alert("Iltimos, buyurtma tafsilotlarini kiriting!");
-        
-        pendingOrderText = text;
+const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
+const FALLBACK_IMGS = { lavash: U("1626700051175-6818013e1d4f"), burger: U("1568901346375-23c9450c58cd"), sandwich: U("1528735602780-2552fd46c7af"), shaurma: U("1561651823-34feb02250e4"), hotdog: U("1612392062631-94dd858cba88"), snek: U("1573080496219-bb080dd4f877") };
 
-        if (savedPhone) {
-            submitOrder(savedPhone, pendingOrderText);
-        } else {
-            document.getElementById("otpModal").classList.add("active");
-        }
-    }
+const MENU = {
+  "Lavash & Pita": { fallback: FALLBACK_IMGS.lavash, list: [{ name: "Lavash STANDART", price: 30000, img: "images/lavash-standart.jpg" }, { name: "Lavash qalampir", price: 32000, img: "images/lavash-qalampir.jpg" }] },
+  "Burgerlar": { fallback: FALLBACK_IMGS.burger, list: [{ name: "Gamburger", price: 28000, img: "images/gamburger.jpg" }, { name: "Cheeseburger", price: 30000, img: "images/cheeseburger.jpg" }] }
+};
 
-    async function requestOTP() {
-        const phone = document.getElementById("inputPhone").value.trim();
-        if (phone.length < 9) return alert("Iltimos, to'liq telefon raqamni kiriting!");
+const items = []; let uid = 0;
+for (const [cat, c] of Object.entries(MENU)) {
+  c.list.forEach(item => items.push({ id: uid++, cat, name: item.name, price: item.price, img: item.img, fallback: c.fallback }));
+}
 
-        const res = await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone })
-        });
-        const data = await res.json();
-
-        if (data.status === "ok") {
-            savedPhone = phone;
-            document.getElementById("stepPhone").classList.add("hidden");
-            document.getElementById("stepCode").classList.remove("hidden");
-            alert(`Tasdiqlash kodi yuborildi! Demo kod: ${data.demo_code}`);
-        }
-    }
-
-    async function confirmOTP() {
-        const code = document.getElementById("inputCode").value.trim();
-        const res = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone: savedPhone, code })
-        });
-        const data = await res.json();
-
-        if (data.status === "ok") {
-            localStorage.setItem("gf_phone", savedPhone);
-            document.getElementById("userPhoneDisplay").innerText = "📱 " + savedPhone;
-            document.getElementById("otpModal").classList.remove("active");
-            
-            submitOrder(savedPhone, pendingOrderText);
-        } else {
-            alert(data.message);
-        }
-    }
-
-    async function submitOrder(phone, text) {
-        const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
-        
-        const res = await fetch(`${BACKEND_URL}/api/order`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                orderId: orderId,
-                text: `🛒 <b>Buyurtma ID:</b> ${orderId}\n📝 <b>Tafsilot:</b> ${text}`,
-                phone: phone
-            })
-        });
-
-        const data = await res.json();
-        if (data.status === "ok") {
-            alert("Buyurtmangiz muvaffaqiyatli qabul qilindi!");
-            document.getElementById("cartItems").value = "";
-            fetchLiveOrders();
-            setInterval(fetchLiveOrders, 8000);
-        }
-    }
-
-    async function fetchLiveOrders() {
-        if (!savedPhone) return;
-
-        try {
-            const res = await fetch(`${BACKEND_URL}/api/orders/${savedPhone}`);
-            const data = await res.json();
-
-            if (data.status === "ok") {
-                const listContainer = document.getElementById("activeOrdersList");
-                const allOrders = [...data.active, ...data.history];
-
-                if (allOrders.length === 0) {
-                    listContainer.innerHTML = "<p>Sizda hali buyurtmalar mavjud emas.</p>";
-                    return;
-                }
-
-                listContainer.innerHTML = allOrders.map(o => {
-                    const isCanceled = o.status.includes("Bekor");
-                    return `
-                        <div class="order-card">
-                            <div><b>Buyurtma ID:</b> ${o.orderId}</div>
-                            <div style="font-size:0.9rem; color:#555; margin-top:4px;">${o.text ? o.text.replace(/<[^>]*>/g, '') : ''}</div>
-                            <div class="status-badge ${isCanceled ? 'status-canceled' : ''}">${o.status}</div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        } catch (e) {
-            console.error("Orders sync error:", e);
-        }
-    }
-</script>
-</body>
-</html>
+const cart = {}; let active = "Hamma ta
