@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garden Food — Maza va Sifat Uyg'unligi</title>
+<meta name="theme-color" content="#0a0a0c">
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+:root{--red:#E52B50;--red2:#DC2626;--gold:#FBBF24;--bg:#0a0a0c;--card:#151519}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.btn{background:linear-gradient(135deg,var(--red),var(--red2));box-shadow:0 8px 20px -8px rgba(229,43,80,.7);transition:.25s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-gold{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#111}
+.chip{border:1px solid #2c2c33;background:var(--card);transition:.25s}
+.chip.on,.chip:hover{background:var(--red);border-color:var(--red)}
+.card{background:var(--card);border:1px solid #25252b;transition:.3s}
+.card:hover{transform:translateY(-6px);border-color:var(--red);box-shadow:0 20px 40px -20px rgba(229,43,80,.5)}
+.card:hover img.food{transform:scale(1.08)}
+img.food{transition:transform .5s}
+.ph{background:linear-gradient(135deg,#3b0d18,#1a1a1f 60%,#3a2c06)}
+.hero{background:linear-gradient(180deg,rgba(10,10,12,.55),var(--bg)),radial-gradient(circle at 85% 15%,rgba(229,43,80,.45),transparent 50%),radial-gradient(circle at 5% 90%,rgba(251,191,36,.22),transparent 45%)}
+.gold-text{background:linear-gradient(90deg,#FBBF24,#F59E0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+#drawer,#otpModal{transition:all .3s ease-in-out}
+.safe-t{padding-top:env(safe-area-inset-top,0px)}
+.safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
+::-webkit-scrollbar{height:6px;width:6px}::-webkit-scrollbar-thumb{background:#333;border-radius:9px}
+.leaflet-container img{max-width:none!important;max-height:none!important}
+</style>
+</head>
+<body>
+
+<header class="sticky top-0 z-40 bg-black/85 backdrop-blur-lg border-b border-zinc-800 safe-t">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <a href="#top" class="flex items-center gap-2">
+      <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full">
+      <span class="font-extrabold text-lg sm:text-xl">Garden <span class="gold-text">Food</span></span>
+    </a>
+    <nav class="hidden md:flex gap-7 text-sm text-zinc-300">
+      <a href="#top" class="hover:text-white">Bosh sahifa</a><a href="#promos" id="navPromos" class="hidden hover:text-white">Aksiyalar</a><a href="#menu" class="hover:text-white">Menyu</a><a href="#contact" class="hover:text-white">Aloqa</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="tel:+998910478780" class="hidden sm:block text-sm font-semibold" style="color:var(--gold)">📞 +998 91 047 87 80</a>
+      <button onclick="toggleCart(true)" class="btn relative rounded-full px-4 py-2 font-semibold text-sm" aria-label="Savatcha">Savatcha
+        <span id="badge" class="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section id="top" class="hero relative overflow-hidden">
+  <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=70" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25" onerror="this.remove()">
+  <div class="relative max-w-6xl mx-auto px-4 py-14 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+    <div class="text-center md:text-left order-2 md:order-1">
+      <span class="inline-block px-4 py-1 rounded-full text-xs font-semibold tracking-wide" style="background:rgba(251,191,36,.15);color:var(--gold)">GARDEN FOOD · FAST-FOOD RESTORANI</span>
+      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">Maza va Sifat <span style="color:var(--red)">Uyg'unligi!</span></h1>
+      <p class="mt-4 text-lg md:text-xl text-zinc-300">Eng mazzali fast-food taomlari Garden Food'da</p>
+      <div class="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
+        <a href="#menu" class="btn rounded-full px-8 py-3 font-bold text-lg">Buyurtma berish</a>
+        <a href="tel:+998910478780" class="btn btn-gold rounded-full px-8 py-3 font-bold text-lg">Qo'ng'iroq qilish</a>
+      </div>
+    </div>
+    <div class="order-1 md:order-2 flex justify-center">
+      <div class="relative">
+        <div class="absolute inset-0 rounded-full blur-3xl opacity-60" style="background:var(--red)"></div>
+        <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Buyurtma Holati Vidjeti (Order Tracker) -->
+<section id="tracker-section" class="hidden max-w-3xl mx-auto my-8 px-4">
+  <div class="card rounded-3xl p-6 border-2 border-yellow-500/50 bg-zinc-900/90 text-center shadow-2xl">
+    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Real-time Buyurtma Holati</span>
+    <h3 class="text-xl font-bold mt-1">Buyurtma ID: <span id="track-id" class="text-red-500">#---</span></h3>
+    <div id="confirmBox" class="hidden mt-4">
+      <a id="confirmLink" href="#" target="_blank" rel="noopener" class="btn btn-gold inline-block rounded-full px-6 py-3 font-bold">✈️ Telegram'da tasdiqlash</a>
+      <p class="text-xs text-zinc-400 mt-2">Botni ochib «Start» bosing va telefon raqamingizni ulashing. Buyurtma shu zahoti tasdiqlanadi.</p>
+    </div>
+    <p id="trackNote" class="hidden mt-3 text-sm text-yellow-300"></p>
+    <div class="my-6 p-4 rounded-2xl bg-black/50 border border-zinc-800">
+      <p id="track-status" class="text-2xl font-extrabold text-yellow-400 animate-pulse">📝 Qabul qilindi</p>
+    </div>
+    <p class="text-xs text-zinc-400">Telegram orqali holat o'zgarganda ushbu oyna avtomatik yangilanadi.</p>
+  </div>
+</section>
+
+<section id="promos" class="hidden max-w-6xl mx-auto px-4 pt-14">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-8"><span class="gold-text">Aksiyalar</span></h2>
+  <div id="promoList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+</section>
+
+<section id="menu" class="max-w-6xl mx-auto px-4 py-14">
+  <div class="text-center mb-8">
+    <h2 class="text-3xl md:text-4xl font-extrabold">Bizning <span class="gold-text">menyu</span></h2>
+    <p class="text-zinc-400 mt-2">Sevimli taomingizni tanlang va savatchaga qo'shing</p>
+  </div>
+  <div id="filters" class="flex gap-2 overflow-x-auto pb-3 md:justify-center md:flex-wrap"></div>
+  <div id="grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mt-6"></div>
+</section>
+
+<section id="contact" class="border-t border-zinc-800 bg-zinc-950">
+  <div class="max-w-6xl mx-auto px-4 py-14 text-center">
+    <h2 class="text-3xl font-extrabold mb-8">Aloqa va <span class="gold-text">manzil</span></h2>
+    <p class="text-zinc-300">📞 <a href="tel:+998910478780" style="color:var(--gold)">+998 91 047 87 80</a> | Ish vaqti: 24/7</p>
+    <div id="socials" class="mt-6 flex flex-wrap gap-3 justify-center"></div>
+  </div>
+</section>
+
+<div id="overlay" onclick="toggleCart(false)" class="fixed inset-0 bg-black/75 z-40 hidden"></div>
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] z-50 bg-zinc-950 border-l border-zinc-800 flex flex-col translate-x-full">
+  <div class="p-4 flex justify-between items-center border-b border-zinc-800 safe-t">
+    <h3 class="text-xl font-bold">Savatcha</h3>
+    <button onclick="toggleCart(false)" class="text-2xl px-2">✕</button>
+  </div>
+  <div id="items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+  <div class="p-4 border-t border-zinc-800 space-y-2 safe-b overflow-y-auto max-h-[70vh]">
+    <div class="flex justify-between text-lg font-bold"><span>Jami:</span><span id="total" style="color:var(--gold)">0 so'm</span></div>
+    <input id="name" placeholder="Ismingiz" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
+    <textarea id="addr" rows="2" placeholder="Yetkazib berish manzili" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white"></textarea>
+    <button type="button" onclick="toggleMap()" class="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-left">📍 Manzilni xaritada belgilash <span id="locState" class="text-green-400"></span></button>
+    <div id="mapBox" class="hidden space-y-1">
+      <div id="map" class="h-56 rounded-xl overflow-hidden border border-zinc-700"></div>
+      <button type="button" onclick="useMyLocation()" class="text-xs text-yellow-300">📡 Mening joylashuvimni aniqlash</button>
+    </div>
+    <p id="deliveryInfo" class="text-sm min-h-[1.25rem]"></p>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <label class="chip rounded-lg px-3 py-2 cursor-pointer flex gap-2"><input type="radio" name="pay" value="cash" onchange="setPay()"> 💵 Naqd</label>
+      <label id="payCardLbl" class="chip rounded-lg px-3 py-2 cursor-pointer flex gap-2"><input type="radio" name="pay" value="card" onchange="setPay()"> 💳 Karta</label>
+    </div>
+    <div id="payInfo" class="hidden rounded-xl bg-zinc-900 border border-yellow-500/40 p-3 text-sm"></div>
+    <button id="orderBtn" onclick="startOrderProcess()" class="btn w-full rounded-xl py-3 font-bold">✈️ Buyurtma berish</button>
+    <p id="msg" class="text-sm text-center text-yellow-300 min-h-[1.25rem]"></p>
+  </div>
+</aside>
+
+<script>
+// Firebase Sozlamalari
+const firebaseConfig = {
+  apiKey: "AIzaSyBxCJ7wtW3CfcpJZ7KmfJy8ylum_Bi4DWs",
+  authDomain: "gardenfoodsam.firebaseapp.com",
+  databaseURL: "https://gardenfoodsam-default-rtdb.firebaseio.com",
+  projectId: "gardenfoodsam",
+  storageBucket: "gardenfoodsam.firebasestorage.app",
+  messagingSenderId: "101369630512",
+  appId: "1:101369630512:web:6972dcbb5d03824ac482f5"
+};
+let db = null;
+try { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
+catch (e) { console.error("Firebase yuklanmadi:", e); }
+
+const BACKEND_URL = "https://gardenfood-backend.onrender.com";
+
+// ===== SOZLAMALAR (bo'sh qoldirilsa, tegishli qism saytda ko'rinmaydi) =====
+const SOCIAL = { instagram: "https://www.instagram.com/gardenfoodfergana", telegram: "https://t.me/ufosaman" };   // "https://instagram.com/...", "https://t.me/..."
+const CARD = { number: "4413 5976 0429 6028", owner: "Samandar A" };           // karta raqami va egasi (bo'sh bo'lsa "Karta" varianti yashirinadi)
+const PROMOS = [];                                // { title: "Aksiya nomi", text: "Tavsif" }
+const MAP_CENTER = [40.3864, 71.7864];                          // [lat, lng] — xarita markazi (bo'sh bo'lsa hududdan olinadi)
+const FREE_ZONES = [[[40.431,71.786],[40.418,71.828],[40.386,71.846],[40.354,71.828],[40.341,71.786],[40.354,71.744],[40.386,71.726],[40.418,71.744]]];                            // bepul yetkazib berish hududlari: [ [[lat,lng],[lat,lng],...], ... ]
+const OUTSIDE_FEE = 0;                            // hududdan tashqarida yetkazib berish narxi (0 = summa alohida aytiladi)
+
+const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
+const FALLBACK_IMGS = { lavash: U("1626700051175-6818013e1d4f"), burger: U("1568901346375-23c9450c58cd"), sandwich: U("1528735602780-2552fd46c7af"), shaurma: U("1561651823-34feb02250e4"), hotdog: U("1612392062631-94dd858cba88"), snek: U("1573080496219-bb080dd4f877") };
+
+// MENU OBYEKTI
+const MENU = {
+  "Lavash & Pita": { fallback: FALLBACK_IMGS.lavash, list: [{ name: "Lavash STANDART", price: 30000, img: "images/lavash-standart.jpg" }, { name: "Lavash qalampir", price: 32000, img: "images/lavash-qalampir.jpg" }, { name: "Lavash сырный", price: 32000, img: "images/lavash-syrnyy.jpg" }, { name: "Lavash куриный", price: 30000, img: "images/lavash-kurinyy.jpg" }, { name: "Lavash EXTRA", price: 36000, img: "images/lavash-extra.jpg" }, { name: "Pita", price: 32000, img: "images/pita.jpg" }, { name: "Pita куриная", price: 30000, img: "images/pita-kurinaya.jpg" }] },
+  "Burgerlar": { fallback: FALLBACK_IMGS.burger, list: [{ name: "Gamburger", price: 28000, img: "images/gamburger.jpg" }, { name: "Cheeseburger", price: 30000, img: "images/cheeseburger.jpg" }, { name: "Bigburger", price: 38000, img: "images/bigburger.jpg" }, { name: "BigDoubleCheese", price: 40000, img: "images/bigdoublecheese.jpg" }, { name: "Куриный Burger", price: 26000, img: "images/kurinyy-burger.jpg" }, { name: "Chicken Burger", price: 28000, img: "images/chicken-burger.jpg" }, { name: "Burger фирменный", price: 38000, img: "images/burger-firmennyy.jpg" }] },
+  "Sandwich & Baget": { fallback: FALLBACK_IMGS.sandwich, list: [{ name: "Haggi", price: 25000, img: "images/haggi.jpg" }, { name: "Baget", price: 32000, img: "images/baget.jpg" }, { name: "Sandwich", price: 35000, img: "images/sandwich.jpg" }, { name: "Tuxum+Kolbasa", price: 32000, img: "images/tuxum-kolbasa.jpg" }] },
+  "Shaurma & Donar": { fallback: FALLBACK_IMGS.shaurma, list: [{ name: "Donar", price: 45000, img: "images/donar.jpg" }, { name: "Куриный Mix", price: 33000, img: "images/kurinyy-mix.jpg" }, { name: "NonKabob", price: 32000, img: "images/nonkabob.jpg" }, { name: "Shaurma", price: 32000, img: "images/shaurma.jpg" }, { name: "Shashlik nonga", price: 32000, img: "images/shashlik-nonga.jpg" }, { name: "Мясной Mix", price: 35000, img: "images/myasnoy-mix.jpg" }] },
+  "HotDoglar": { fallback: FALLBACK_IMGS.hotdog, list: [{ name: "Kolbasali HotDog", price: 15000, img: "images/kolbasali-hotdog.jpg" }, { name: "Kolbasali HotDog 2X", price: 18000, img: "images/kolbasali-hotdog-2x.jpg" }, { name: "HotDog лепешка", price: 16000, img: "images/hotdog-lepeshka.jpg" }, { name: "Classic HotDog 2X", price: 15000, img: "images/classic-hotdog-2x.jpg" }, { name: "Королевский HotDog 3X", price: 20000, img: "images/korolevskiy-hotdog-3x.jpg" }, { name: "Королевский HotDog 4X", price: 22000, img: "images/korolevskiy-hotdog-4x.jpg" }, { name: "Qazili HotDog Mini", price: 25000, img: "images/qazili-hotdog-mini.jpg" }, { name: "Qazili HotDog Big", price: 32000, img: "images/qazili-hotdog-big.jpg" }, { name: "Фирменный HotDog Mini", price: 26000, img: "images/firmennyy-hotdog-mini.jpg" }, { name: "Фирменный HotDog Big", price: 35000, img: "images/firmennyy-hotdog-big.jpg" }, { name: "Шашлычный HotDog Mini", price: 24000, img: "images/shashlychnyy-hotdog-mini.jpg" }, { name: "Шашлычный HotDog Big", price: 32000, img: "images/shashlychnyy-hotdog-big.jpg" }] },
+  "Snek & Garnirlar": { fallback: FALLBACK_IMGS.snek, list: [{ name: "Kartoshka fri", price: 16000, img: "images/kartoshka-fri.jpg" }, { name: "Kartoshkа по деревенские", price: 20000, img: "images/kartoshka-po-derevenskie.jpg" }, { name: "Куриные шарики 12 ta", price: 18000, img: "images/kurinye-shariki-12-ta.jpg" }, { name: "Nuggets 250gramm", price: 30000, img: "images/nuggets-250gramm.jpg" }] }
+};
+
+const items = []; let uid = 0;
+for (const [cat, c] of Object.entries(MENU)) {
+  c.list.forEach(item => items.push({ id: uid++, cat, name: item.name, price: item.price, img: item.img, fallback: c.fallback }));
+}
+
+const cart = {}; let active = "Hamma taomlar";
+const fmt = n => n.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " so'm";
+const $ = s => document.getElementById(s);
+
+function renderFilters() {
+  $("filters").innerHTML = ["Hamma taomlar", ...Object.keys(MENU)].map(c => `<button data-c="${c}" class="chip whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold ${c === active ? "on" : ""}">${c}</button>`).join("");
+  $("filters").querySelectorAll("button").forEach(b => b.onclick = () => { active = b.dataset.c; renderFilters(); renderGrid(); });
+}
+
+function renderGrid() {
+  $("grid").innerHTML = items.filter(i => active === "Hamma taomlar" || i.cat === active).map(i => `
+    <article class="card rounded-3xl overflow-hidden flex flex-col">
+      <div class="ph relative aspect-[4/3] overflow-hidden flex items-center justify-center p-3 text-center">
+        <span class="font-extrabold text-lg text-white/70">${i.name}</span>
+        <img src="${i.img}" alt="${i.name}" class="food absolute inset-0 w-full h-full object-cover" onerror="this.onerror=null; this.src='${i.fallback}';">
+      </div>
+      <div class="p-3 sm:p-5 flex flex-col flex-1">
+        <h3 class="font-bold text-base sm:text-lg leading-tight">${i.name}</h3>
+        <p class="mt-1 text-lg sm:text-xl font-extrabold" style="color:var(--gold)">${fmt(i.price)}</p>
+        <button onclick="add(${i.id})" class="btn mt-auto rounded-xl py-2.5 mt-4 text-sm font-semibold">Savatga qo'shish</button>
+      </div>
+    </article>`).join("");
+}
+
+function add(i) { cart[i] = (cart[i] || 0) + 1; renderCart(); }
+function chg(i, d) { cart[i] += d; if (cart[i] <= 0) delete cart[i]; renderCart(); }
+function del(i) { delete cart[i]; renderCart(); }
+
+function renderCart() {
+  const ids = Object.keys(cart); let total = 0, count = 0;
+  $("items").innerHTML = ids.length ? ids.map(k => {
+    const it = items[k], q = cart[k]; total += it.price * q; count += q;
+    return `<div class="flex items-center gap-3 bg-zinc-900 rounded-2xl p-2">
+      <div class="flex-1 min-w-0"><p class="font-semibold text-sm truncate">${it.name}</p><p class="text-xs text-zinc-400">${fmt(it.price * q)}</p></div>
+      <div class="flex items-center gap-1.5">
+        <button onclick="chg(${k},-1)" class="w-7 h-7 rounded-full bg-zinc-700">−</button><span class="w-5 text-center text-sm">${q}</span>
+        <button onclick="chg(${k},1)" class="w-7 h-7 rounded-full bg-zinc-700">+</button>
+        <button onclick="del(${k})" class="ml-1 text-red-400">🗑</button>
+      </div></div>`;
+  }).join("") : `<p class="text-center text-zinc-500 mt-10">Savatcha bo'sh</p>`;
+  $("badge").textContent = count; $("total").textContent = fmt(total);
+}
+
+function toggleCart(o) {
+  $("drawer").classList.toggle("translate-x-full", !o);
+  $("overlay").classList.toggle("hidden", !o);
+}
+
+function startOrderProcess() {
+  const m = $("msg");
+  if (!Object.keys(cart).length) { m.textContent = "Savatcha bo'sh!"; return; }
+  if (!$("name").value.trim() || !$("addr").value.trim()) { m.textContent = "Ism va manzilni kiriting!"; return; }
+  if (window.L && !picked) { m.textContent = "Xaritada manzilni belgilang!"; return; }
+  if (!payVal()) { m.textContent = "To'lov turini tanlang!"; return; }
+  submitOrder();
+}
+
+async function submitOrder() {
+  const m = $("msg"), btn = $("orderBtn");
+  const body = {
+    name: $("name").value.trim(),
+    address: $("addr").value.trim(),
+    payment: payVal(), location: picked, zoneFree,
+    items: Object.keys(cart).map(k => ({ name: items[k].name, qty: cart[k] }))
+  };
+  m.textContent = "Yuborilmoqda..."; btn.disabled = true;
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/order`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.status !== "ok") { m.textContent = "❌ " + (data.message || "Xatolik yuz berdi."); return; }
+    for (const k in cart) delete cart[k];
+    renderCart(); m.textContent = ""; toggleCart(false);
+    localStorage.setItem("gf_order", data.orderId);
+    localStorage.setItem("gf_link", data.botLink);
+    $("trackNote").innerHTML = payHTML(body.payment); $("trackNote").classList.remove("hidden");
+    trackOrder(data.orderId, true);
+  } catch (err) {
+    m.textContent = "❌ Backend bilan aloqa yo'q, 1 daqiqadan keyin qayta urinib ko'ring.";
+  } finally { btn.disabled = false; }
+}
+
+function renderExtras() {
+  $("promos").classList.remove("hidden"); $("navPromos").classList.remove("hidden");
+  $("promoList").innerHTML = PROMOS.length
+    ? PROMOS.map(p => `<div class="card rounded-3xl p-5"><h3 class="text-lg font-bold" style="color:var(--gold)">🔥 ${p.title}</h3><p class="mt-2 text-sm text-zinc-300">${p.text}</p></div>`).join("")
+    : `<p class="sm:col-span-2 lg:col-span-3 text-center text-zinc-400">Hozircha aksiyalar yo'q. Tez orada yangi takliflar bilan qaytamiz! 🔥</p>`;
+  const l = [];
+  if (SOCIAL.instagram) l.push(`<a href="${SOCIAL.instagram}" target="_blank" rel="noopener" class="btn rounded-full px-6 py-2 font-semibold">📸 Instagram</a>`);
+  if (SOCIAL.telegram) l.push(`<a href="${SOCIAL.telegram}" target="_blank" rel="noopener" class="btn btn-gold rounded-full px-6 py-2 font-semibold">✈️ Telegram</a>`);
+  $("socials").innerHTML = l.join("");
+  if (!CARD.number) $("payCardLbl").classList.add("hidden");
+}
+
+// ---- Xarita va yetkazib berish hududi ----
+let map, marker, picked = null, zoneFree = null;
+function inPoly(lat, lng, poly) {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ai, bi] = poly[i], [aj, bj] = poly[j];
+    if ((ai > lat) !== (aj > lat) && lng < (bj - bi) * (lat - ai) / (aj - ai) + bi) c = !c;
+  }
+  return c;
+}
+function setPoint(lat, lng) {
+  picked = { lat, lng };
+  if (marker) marker.setLatLng([lat, lng]); else marker = L.marker([lat, lng]).addTo(map);
+  $("locState").textContent = "✓";
+  const info = $("deliveryInfo");
+  if (!FREE_ZONES.length) { zoneFree = null; info.className = "text-sm text-zinc-300"; info.textContent = "Yetkazib berish narxi operator tomonidan aytiladi."; return; }
+  zoneFree = FREE_ZONES.some(z => inPoly(lat, lng, z));
+  info.className = "text-sm font-semibold " + (zoneFree ? "text-green-400" : "text-yellow-300");
+  info.textContent = zoneFree ? "🚚 Yetkazib berish BEPUL" : "🚚 Hududdan tashqarida: yetkazib berish pullik" + (OUTSIDE_FEE ? ` (${fmt(OUTSIDE_FEE)}, alohida to'lanadi)` : ", summasi alohida to'lanadi");
+}
+function toggleMap() {
+  if (!window.L) { $("deliveryInfo").textContent = "Xarita yuklanmadi, sahifani yangilang."; return; }
+  const b = $("mapBox"); b.classList.toggle("hidden");
+  if (b.classList.contains("hidden")) return;
+  if (!map) {
+    map = L.map("map").setView(MAP_CENTER || [41.3, 64.5], MAP_CENTER ? 13 : 6);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+    FREE_ZONES.forEach(z => L.polygon(z, { color: "#22c55e", fillOpacity: .15 }).addTo(map));
+    if (FREE_ZONES.length && !MAP_CENTER) map.fitBounds(L.latLngBounds(FREE_ZONES.flat()));
+    map.on("click", e => setPoint(e.latlng.lat, e.latlng.lng));
+  }
+  setTimeout(() => map.invalidateSize(), 50);
+}
+function useMyLocation() {
+  if (!map || !navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    p => { setPoint(p.coords.latitude, p.coords.longitude); map.setView([p.coords.latitude, p.coords.longitude], 16); },
+    () => { $("deliveryInfo").textContent = "Joylashuvni aniqlab bo'lmadi, xaritadan belgilang."; });
+}
+
+// ---- To'lov turi ----
+const payVal = () => (document.querySelector("input[name=pay]:checked") || {}).value;
+function payHTML(v) {
+  const tg = SOCIAL.telegram ? `: <a class="underline text-yellow-300" target="_blank" href="${SOCIAL.telegram}">Telegram'ga yozish</a>` : ".";
+  return v === "card"
+    ? `💳 Karta: <b class="select-all">${CARD.number}</b><br>Egasi: <b>${CARD.owner}</b><br>To'lovni o'tkazgach, chekni Telegram orqali yuboring${tg}`
+    : "💵 Buyurtma yetib kelganda kuryerga naqd to'laysiz.";
+}
+function setPay() {
+  const v = payVal(), box = $("payInfo");
+  document.querySelectorAll("input[name=pay]").forEach(r => r.parentElement.classList.toggle("on", r.checked));
+  box.classList.toggle("hidden", !v);
+  if (v) box.innerHTML = payHTML(v);
+}
+
+let trackRef = null;
+function trackOrder(orderId, scroll) {
+  $("tracker-section").classList.remove("hidden");
+  $("track-id").textContent = "#" + orderId;
+  if (scroll) $("tracker-section").scrollIntoView({ behavior: "smooth" });
+  $("confirmLink").href = localStorage.getItem("gf_link") || "#";
+  if (!db) { $("track-status").textContent = "Holatni yuklab bo'lmadi, sahifani yangilang"; return; }
+  if (trackRef) trackRef.off();
+  trackRef = db.ref("orders/" + orderId + "/status");
+  trackRef.on("value", snapshot => {
+    if (!snapshot.exists()) return;
+    const s = snapshot.val(), el = $("track-status");
+    el.textContent = s;
+    $("confirmBox").classList.toggle("hidden", !s.includes("tasdiqlang"));
+    if (s.includes("Bekor qilindi")) {
+      el.className = "text-2xl font-extrabold text-red-500 animate-bounce";
+      localStorage.removeItem("gf_order");
+    } else if (s.includes("Yetkazib berildi")) {
+      el.className = "text-2xl font-extrabold text-green-400";
+      localStorage.removeItem("gf_order");
+    } else {
+      el.className = "text-2xl font-extrabold text-yellow-400 animate-pulse";
+    }
+  });
+}
+
+renderExtras(); renderFilters(); renderGrid(); renderCart();
+const activeOrder = localStorage.getItem("gf_order"); if (activeOrder) trackOrder(activeOrder);
+</script>
+</body>
+</html>
