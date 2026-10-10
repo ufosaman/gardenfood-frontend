@@ -6,6 +6,10 @@
 <title>Garden Food — Maza va Sifat Uyg'unligi</title>
 <meta name="theme-color" content="#0a0a0c">
 <link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Oswald:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="i18n.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -15,19 +19,20 @@
 <style>
 :root{--red:#E52B50;--red2:#DC2626;--gold:#FBBF24;--bg:#0a0a0c;--card:#151519}
 html{scroll-behavior:smooth;scroll-padding-top:90px}
-body{background:var(--bg);color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.btn{background:linear-gradient(135deg,var(--red),var(--red2));box-shadow:0 8px 20px -8px rgba(229,43,80,.7);transition:.25s}
-.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
-.btn-gold{background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#111}
-.chip{border:1px solid #2c2c33;background:var(--card);transition:.25s}
+body{background:var(--bg);color:#fff;font-family:"Nunito","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3,.head{font-family:"Oswald","Noto Sans Devanagari","Arial Narrow",Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em}
+.btn{background:var(--red);box-shadow:0 4px 12px -4px rgba(229,43,80,.55);transition:.25s;font-family:"Oswald","Noto Sans Devanagari","Arial Narrow",Impact,sans-serif;text-transform:uppercase;letter-spacing:.05em}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.btn-gold{background:var(--gold);color:#111}
+.chip{border:1px solid #2c2c33;background:var(--card);transition:.25s;font-family:"Oswald","Noto Sans Devanagari","Arial Narrow",Impact,sans-serif;text-transform:uppercase;letter-spacing:.05em}
 .chip.on,.chip:hover{background:var(--red);border-color:var(--red)}
 .card{background:var(--card);border:1px solid #25252b;transition:.3s}
-.card:hover{transform:translateY(-6px);border-color:var(--red);box-shadow:0 20px 40px -20px rgba(229,43,80,.5)}
+.card:hover{transform:translateY(-4px);border-color:var(--red);box-shadow:0 12px 24px -16px rgba(0,0,0,.8)}
 .card:hover img.food{transform:scale(1.08)}
 img.food{transition:transform .5s}
 .ph{background:linear-gradient(135deg,#3b0d18,#1a1a1f 60%,#3a2c06)}
 .hero{background:linear-gradient(180deg,rgba(10,10,12,.55),var(--bg)),radial-gradient(circle at 85% 15%,rgba(229,43,80,.45),transparent 50%),radial-gradient(circle at 5% 90%,rgba(251,191,36,.22),transparent 45%)}
-.gold-text{background:linear-gradient(90deg,#FBBF24,#F59E0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gold-text{color:var(--gold)}
 #drawer,#otpModal{transition:all .3s ease-in-out}
 .safe-t{padding-top:env(safe-area-inset-top,0px)}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -41,14 +46,15 @@ img.food{transition:transform .5s}
   <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
     <a href="#top" class="flex items-center gap-2">
       <img src="logo.png" alt="Garden Food Logo" class="h-11 w-11 object-contain rounded-full">
-      <span class="font-extrabold text-lg sm:text-xl">Garden <span class="gold-text">Food</span></span>
+      <span class="head font-bold text-xl sm:text-2xl">Garden <span class="gold-text">Food</span></span>
     </a>
     <nav class="hidden md:flex gap-7 text-sm text-zinc-300">
-      <a href="#top" class="hover:text-white">Bosh sahifa</a><a href="#promos" id="navPromos" class="hidden hover:text-white">Aksiyalar</a><a href="#menu" class="hover:text-white">Menyu</a><a href="#contact" class="hover:text-white">Aloqa</a>
+      <a href="#top" class="hover:text-white" data-i18n="nav_home">Bosh sahifa</a><a href="#promos" id="navPromos" class="hidden hover:text-white" data-i18n="nav_promos">Aksiyalar</a><a href="#menu" class="hover:text-white" data-i18n="nav_menu">Menyu</a><a href="#contact" class="hover:text-white" data-i18n="nav_contact">Aloqa</a>
     </nav>
     <div class="flex items-center gap-3">
       <a href="tel:+998910478780" class="hidden sm:block text-sm font-semibold" style="color:var(--gold)">📞 +998 91 047 87 80</a>
-      <button onclick="toggleCart(true)" class="btn relative rounded-full px-4 py-2 font-semibold text-sm" aria-label="Savatcha">Savatcha
+      <select id="langSel" onchange="setLang(this.value)" aria-label="Language" class="rounded-full bg-zinc-900 border border-zinc-700 px-2 py-1.5 text-sm text-white outline-none cursor-pointer"><option value="uz">O'zbek</option><option value="ru">Русский</option><option value="en">English</option><option value="hi">हिन्दी</option></select>
+      <button onclick="toggleCart(true)" class="btn relative rounded-full px-4 py-2 font-semibold text-sm" aria-label="Savatcha" data-i18n-aria="cart"><span data-i18n="cart">Savatcha</span>
         <span id="badge" class="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
       </button>
     </div>
@@ -59,17 +65,16 @@ img.food{transition:transform .5s}
   <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1600&q=70" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25" onerror="this.remove()">
   <div class="relative max-w-6xl mx-auto px-4 py-14 md:py-24 grid md:grid-cols-2 gap-10 items-center">
     <div class="text-center md:text-left order-2 md:order-1">
-      <span class="inline-block px-4 py-1 rounded-full text-xs font-semibold tracking-wide" style="background:rgba(251,191,36,.15);color:var(--gold)">GARDEN FOOD · FAST-FOOD RESTORANI</span>
-      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">Maza va Sifat <span style="color:var(--red)">Uyg'unligi!</span></h1>
-      <p class="mt-4 text-lg md:text-xl text-zinc-300">Eng mazzali fast-food taomlari Garden Food'da</p>
+      <span class="inline-block px-4 py-1 rounded-full text-xs font-semibold tracking-wide" style="background:rgba(251,191,36,.15);color:var(--gold)" data-i18n="hero_badge">GARDEN FOOD · FAST-FOOD RESTORANI</span>
+      <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight"><span data-i18n="hero1">Maza va Sifat</span> <span style="color:var(--red)" data-i18n="hero2">Uyg'unligi!</span></h1>
+      <p class="mt-4 text-lg md:text-xl text-zinc-300" data-i18n="hero_sub">Eng mazzali fast-food taomlari Garden Food'da</p>
       <div class="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
-        <a href="#menu" class="btn rounded-full px-8 py-3 font-bold text-lg">Buyurtma berish</a>
-        <a href="tel:+998910478780" class="btn btn-gold rounded-full px-8 py-3 font-bold text-lg">Qo'ng'iroq qilish</a>
+        <a href="#menu" class="btn rounded-full px-8 py-3 font-bold text-lg" data-i18n="btn_order">Buyurtma berish</a>
+        <a href="tel:+998910478780" class="btn btn-gold rounded-full px-8 py-3 font-bold text-lg" data-i18n="btn_call">Qo'ng'iroq qilish</a>
       </div>
     </div>
     <div class="order-1 md:order-2 flex justify-center">
       <div class="relative">
-        <div class="absolute inset-0 rounded-full blur-3xl opacity-60" style="background:var(--red)"></div>
         <img src="logo.png" alt="Garden Food Logo" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain rounded-full">
       </div>
     </div>
@@ -79,29 +84,36 @@ img.food{transition:transform .5s}
 <!-- Buyurtma Holati Vidjeti (Order Tracker) -->
 <section id="tracker-section" class="hidden max-w-3xl mx-auto my-8 px-4">
   <div class="card rounded-3xl p-6 border-2 border-yellow-500/50 bg-zinc-900/90 text-center shadow-2xl">
-    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400">Real-time Buyurtma Holati</span>
-    <h3 class="text-xl font-bold mt-1">Buyurtma ID: <span id="track-id" class="text-red-500">#---</span></h3>
+    <span class="text-xs font-bold uppercase tracking-wider text-yellow-400" data-i18n="trk_title">Real-time Buyurtma Holati</span>
+    <h3 class="text-xl font-bold mt-1"><span data-i18n="trk_id">Buyurtma ID:</span> <span id="track-id" class="text-red-500">#---</span></h3>
     <div id="confirmBox" class="hidden mt-4">
-      <a id="confirmLink" href="#" target="_blank" rel="noopener" class="btn btn-gold inline-block rounded-full px-6 py-3 font-bold">✈️ Telegram'da tasdiqlash</a>
-      <p class="text-xs text-zinc-400 mt-2">Botni ochib «Start» bosing va telefon raqamingizni ulashing. Buyurtma shu zahoti tasdiqlanadi.</p>
+      <a id="confirmLink" href="#" target="_blank" rel="noopener" class="btn btn-gold inline-block rounded-full px-6 py-3 font-bold" data-i18n="cf_btn">✈️ Telegram'da tasdiqlash</a>
+      <p class="text-xs text-zinc-400 mt-2" data-i18n="cf_hint">Botni ochib «Start» bosing va telefon raqamingizni ulashing. Buyurtma shu zahoti tasdiqlanadi.</p>
     </div>
     <p id="trackNote" class="hidden mt-3 text-sm text-yellow-300"></p>
     <div class="my-6 p-4 rounded-2xl bg-black/50 border border-zinc-800">
       <p id="track-status" class="text-2xl font-extrabold text-yellow-400 animate-pulse">📝 Qabul qilindi</p>
     </div>
-    <p class="text-xs text-zinc-400">Telegram orqali holat o'zgarganda ushbu oyna avtomatik yangilanadi.</p>
+    <div id="reviewBox" class="hidden mt-5 text-left rounded-2xl bg-black/40 border border-zinc-800 p-4">
+      <p class="font-bold text-center" data-i18n="rv_title">Buyurtma yetkazildi! Xizmatni baholang</p>
+      <div id="stars" class="flex justify-center gap-1 my-3 text-4xl select-none"></div>
+      <textarea id="reviewText" rows="2" maxlength="500" placeholder="Fikringizni yozing (ixtiyoriy)" data-i18n-ph="rv_ph" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-yellow-400 text-white"></textarea>
+      <div class="flex gap-2 mt-3"><button id="reviewBtn" onclick="sendReview()" class="btn flex-1 rounded-xl py-2 font-semibold" data-i18n="rv_send">Yuborish</button><button onclick="closeReview()" class="rounded-xl px-4 py-2 bg-zinc-800 text-sm" data-i18n="rv_later">Keyinroq</button></div>
+      <p id="reviewMsg" class="text-sm text-center text-yellow-300 mt-2 min-h-[1rem]"></p>
+    </div>
+    <p class="text-xs text-zinc-400 mt-3" data-i18n="trk_note">Telegram orqali holat o'zgarganda ushbu oyna avtomatik yangilanadi.</p>
   </div>
 </section>
 
 <section id="promos" class="hidden max-w-6xl mx-auto px-4 pt-14">
-  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-8"><span class="gold-text">Aksiyalar</span></h2>
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-8"><span class="gold-text" data-i18n="promos_h">Aksiyalar</span></h2>
   <div id="promoList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </section>
 
 <section id="menu" class="max-w-6xl mx-auto px-4 py-14">
   <div class="text-center mb-8">
-    <h2 class="text-3xl md:text-4xl font-extrabold">Bizning <span class="gold-text">menyu</span></h2>
-    <p class="text-zinc-400 mt-2">Sevimli taomingizni tanlang va savatchaga qo'shing</p>
+    <h2 class="text-3xl md:text-4xl font-extrabold"><span data-i18n="menu_h1">Bizning</span> <span class="gold-text" data-i18n="menu_h2">menyu</span></h2>
+    <p class="text-zinc-400 mt-2" data-i18n="menu_sub">Sevimli taomingizni tanlang va savatchaga qo'shing</p>
   </div>
   <div id="filters" class="flex gap-2 overflow-x-auto pb-3 md:justify-center md:flex-wrap"></div>
   <div id="grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mt-6"></div>
@@ -109,9 +121,9 @@ img.food{transition:transform .5s}
 
 <section id="contact" class="border-t border-zinc-800 bg-zinc-950">
   <div class="max-w-6xl mx-auto px-4 py-14 text-center">
-    <h2 class="text-3xl font-extrabold mb-8">Aloqa va <span class="gold-text">manzil</span></h2>
+    <h2 class="text-3xl font-extrabold mb-8"><span data-i18n="c_h1">Aloqa va</span> <span class="gold-text" data-i18n="c_h2">manzil</span></h2>
     <p id="addrLine" class="hidden text-zinc-300 mb-3"></p>
-    <p class="text-zinc-300">📞 <a href="tel:+998910478780" style="color:var(--gold)">+998 91 047 87 80</a> | Ish vaqti: 24/7</p>
+    <p class="text-zinc-300">📞 <a href="tel:+998910478780" style="color:var(--gold)">+998 91 047 87 80</a> | <span data-i18n="hours">Ish vaqti: 24/7</span></p>
     <div id="socials" class="mt-6 flex flex-wrap gap-3 justify-center"></div>
   </div>
 </section>
@@ -119,26 +131,27 @@ img.food{transition:transform .5s}
 <div id="overlay" onclick="toggleCart(false)" class="fixed inset-0 bg-black/75 z-40 hidden"></div>
 <aside id="drawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] z-50 bg-zinc-950 border-l border-zinc-800 flex flex-col translate-x-full">
   <div class="p-4 flex justify-between items-center border-b border-zinc-800 safe-t">
-    <h3 class="text-xl font-bold">Savatcha</h3>
+    <h3 class="text-xl font-bold" data-i18n="cart">Savatcha</h3>
     <button onclick="toggleCart(false)" class="text-2xl px-2">✕</button>
   </div>
   <div id="items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
   <div class="p-4 border-t border-zinc-800 space-y-2 safe-b overflow-y-auto max-h-[70vh]">
-    <div class="flex justify-between text-lg font-bold"><span>Jami:</span><span id="total" style="color:var(--gold)">0 so'm</span></div>
-    <input id="name" placeholder="Ismingiz" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
-    <textarea id="addr" rows="2" placeholder="Yetkazib berish manzili" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white"></textarea>
-    <button type="button" onclick="toggleMap()" class="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-left">📍 Manzilni xaritada belgilash <span id="locState" class="text-green-400"></span></button>
+    <div class="flex justify-between text-lg font-bold"><span data-i18n="total">Jami:</span><span id="total" style="color:var(--gold)">0 so'm</span></div>
+    <input id="name" placeholder="Ismingiz" data-i18n-ph="ph_name" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white">
+    <textarea id="addr" rows="2" placeholder="Yetkazib berish manzili" data-i18n-ph="ph_addr" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white"></textarea>
+    <textarea id="note" rows="2" maxlength="300" placeholder="Izoh (ixtiyoriy): masalan, sousni kamroq qo'shing" data-i18n-ph="ph_note" class="w-full rounded-lg bg-zinc-900 border border-zinc-700 px-3 py-2 outline-none focus:border-red-500 text-white"></textarea>
+    <button type="button" onclick="toggleMap()" class="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-left"><span data-i18n="loc_btn">📍 Manzilni xaritada belgilash</span> <span id="locState" class="text-green-400"></span></button>
     <div id="mapBox" class="hidden space-y-1">
       <div id="map" class="h-56 rounded-xl overflow-hidden border border-zinc-700"></div>
-      <button type="button" onclick="useMyLocation()" class="text-xs text-yellow-300">📡 Mening joylashuvimni aniqlash</button>
+      <button type="button" onclick="useMyLocation()" class="text-xs text-yellow-300" data-i18n="loc_me">📡 Mening joylashuvimni aniqlash</button>
     </div>
     <p id="deliveryInfo" class="text-sm min-h-[1.25rem]"></p>
     <div class="grid grid-cols-2 gap-2 text-sm">
-      <label class="chip rounded-lg px-3 py-2 cursor-pointer flex gap-2"><input type="radio" name="pay" value="cash" onchange="setPay()"> 💵 Naqd</label>
-      <label id="payCardLbl" class="chip rounded-lg px-3 py-2 cursor-pointer flex gap-2"><input type="radio" name="pay" value="card" onchange="setPay()"> 💳 Karta</label>
+      <label class="chip rounded-lg px-3 py-2 cursor-pointer flex gap-2"><input type="radio" name="pay" value="cash" onchange="setPay()"> <span data-i18n="pay_cash">💵 Naqd</span></label>
+      <label id="payCardLbl" class="chip rounded-lg px-3 py-2 cursor-pointer flex gap-2"><input type="radio" name="pay" value="card" onchange="setPay()"> <span data-i18n="pay_card">💳 Karta</span></label>
     </div>
     <div id="payInfo" class="hidden rounded-xl bg-zinc-900 border border-yellow-500/40 p-3 text-sm"></div>
-    <button id="orderBtn" onclick="startOrderProcess()" class="btn w-full rounded-xl py-3 font-bold">✈️ Buyurtma berish</button>
+    <button id="orderBtn" onclick="startOrderProcess()" class="btn w-full rounded-xl py-3 font-bold" data-i18n="order_btn">✈️ Buyurtma berish</button>
     <p id="msg" class="text-sm text-center text-yellow-300 min-h-[1.25rem]"></p>
   </div>
 </aside>
@@ -160,6 +173,14 @@ catch (e) { console.error("Firebase yuklanmadi:", e); }
 
 const BACKEND_URL = "https://gardenfood-backend.onrender.com";
 
+// ---- Til ----
+const LANGS = ["uz", "ru", "en", "hi"];
+let lang = localStorage.getItem("gf_lang") || ((navigator.language || "uz").slice(0, 2));
+if (!LANGS.includes(lang)) lang = "uz";
+const t = (k, ...a) => { const v = (I18N[lang] && I18N[lang][k]) ?? I18N.uz[k] ?? k; return typeof v === "function" ? v(...a) : v; };
+const ml = x => (x && typeof x === "object") ? (x[lang] || x.uz || "") : (x || "");   // {uz,ru,en,hi} yoki oddiy matn
+const catName = c => (CAT_T[c] && CAT_T[c][lang]) || c;
+
 // ===== SOZLAMALAR (bo'sh qoldirilsa, tegishli qism saytda ko'rinmaydi) =====
 const SOCIAL = { instagram: "https://www.instagram.com/gardenfoodfergana", telegram: "https://t.me/ufosaman" };   // "https://instagram.com/...", "https://t.me/..."
 const CARD = { number: "4413 5976 0429 6028", owner: "Samandar A" };           // karta raqami va egasi (bo'sh bo'lsa "Karta" varianti yashirinadi)
@@ -167,7 +188,7 @@ const PROMOS = [];                                // { title: "Aksiya nomi", tex
 const MAP_CENTER = [40.3864, 71.7864];                          // [lat, lng] — xarita markazi (bo'sh bo'lsa hududdan olinadi)
 const FREE_ZONES = [[[40.431,71.786],[40.418,71.828],[40.386,71.846],[40.354,71.828],[40.341,71.786],[40.354,71.744],[40.386,71.726],[40.418,71.744]]];                            // bepul yetkazib berish hududlari: [ [[lat,lng],[lat,lng],...], ... ]
 const OUTSIDE_FEE = 0;                            // hududdan tashqarida yetkazib berish narxi (0 = summa alohida aytiladi)
-const ADDRESS = { text: "Farg'ona, Yuksalish ko'chasi, 74", lat: 40.375855, lng: 71.805440, url: "https://yandex.uz/maps/-/CXqq66ji" };   // restoran manzili; url — "Xaritada ochish" havolasi
+const ADDRESS = { text: { uz: "Farg'ona, Yuksalish ko'chasi, 74", ru: "Фергана, улица Юксалиш, 74", en: "Fergana, Yuksalish street, 74", hi: "फ़रगना, युक्सालिश स्ट्रीट, 74" }, lat: 40.375855, lng: 71.805440, url: "https://yandex.uz/maps/-/CXqq66ji" };   // restoran manzili; url — "Xaritada ochish" havolasi
 
 const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=700&q=70`;
 const FALLBACK_IMGS = { lavash: U("1626700051175-6818013e1d4f"), burger: U("1568901346375-23c9450c58cd"), sandwich: U("1528735602780-2552fd46c7af"), shaurma: U("1561651823-34feb02250e4"), hotdog: U("1612392062631-94dd858cba88"), snek: U("1573080496219-bb080dd4f877") };
@@ -209,11 +230,11 @@ function startMenuSync() {
 }
 
 const cart = {}; let active = "Hamma taomlar";
-const fmt = n => n.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " so'm";
+const fmt = n => n.toLocaleString("ru-RU").replace(/\u00a0/g, " ") + " " + t("cur");
 const $ = s => document.getElementById(s);
 
 function renderFilters() {
-  $("filters").innerHTML = ["Hamma taomlar", ...categories.filter(c => items.some(i => i.cat === c))].map(c => `<button data-c="${esc(c)}" class="chip whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold ${c === active ? "on" : ""}">${esc(c)}</button>`).join("");
+  $("filters").innerHTML = ["Hamma taomlar", ...categories.filter(c => items.some(i => i.cat === c))].map(c => `<button data-c="${esc(c)}" class="chip whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold ${c === active ? "on" : ""}">${esc(c === "Hamma taomlar" ? t("all") : catName(c))}</button>`).join("");
   $("filters").querySelectorAll("button").forEach(b => b.onclick = () => { active = b.dataset.c; renderFilters(); renderGrid(); });
 }
 
@@ -226,8 +247,8 @@ function renderGrid() {
       </div>
       <div class="p-3 sm:p-5 flex flex-col flex-1">
         <h3 class="font-bold text-base sm:text-lg leading-tight">${esc(i.name)}</h3>
-        <p class="mt-1 text-lg sm:text-xl font-extrabold" style="color:var(--gold)">${fmt(i.price)}</p>
-        <button onclick="add('${i.id}')" class="btn mt-auto rounded-xl py-2.5 mt-4 text-sm font-semibold">Savatga qo'shish</button>
+        <p class="head mt-1 text-xl sm:text-2xl font-bold" style="color:var(--gold)">${fmt(i.price)}</p>
+        <button onclick="add('${i.id}')" class="btn mt-auto rounded-xl py-2.5 mt-4 text-sm font-semibold">${t("add")}</button>
       </div>
     </article>`).join("");
 }
@@ -247,7 +268,7 @@ function renderCart() {
         <button onclick="chg('${k}',1)" class="w-7 h-7 rounded-full bg-zinc-700">+</button>
         <button onclick="del('${k}')" class="ml-1 text-red-400">🗑</button>
       </div></div>`;
-  }).join("") : `<p class="text-center text-zinc-500 mt-10">Savatcha bo'sh</p>`;
+  }).join("") : `<p class="text-center text-zinc-500 mt-10">${t("cart_empty")}</p>`;
   $("badge").textContent = count; $("total").textContent = fmt(total);
 }
 
@@ -258,10 +279,10 @@ function toggleCart(o) {
 
 function startOrderProcess() {
   const m = $("msg");
-  if (!Object.keys(cart).length) { m.textContent = "Savatcha bo'sh!"; return; }
-  if (!$("name").value.trim() || !$("addr").value.trim()) { m.textContent = "Ism va manzilni kiriting!"; return; }
-  if (window.L && !picked) { m.textContent = "Xaritada manzilni belgilang!"; return; }
-  if (!payVal()) { m.textContent = "To'lov turini tanlang!"; return; }
+  if (!Object.keys(cart).length) { m.textContent = t("m_empty"); return; }
+  if (!$("name").value.trim() || !$("addr").value.trim()) { m.textContent = t("m_namaddr"); return; }
+  if (window.L && !picked) { m.textContent = t("m_pickmap"); return; }
+  if (!payVal()) { m.textContent = t("m_pay"); return; }
   submitOrder();
 }
 
@@ -270,39 +291,40 @@ async function submitOrder() {
   const body = {
     name: $("name").value.trim(),
     address: $("addr").value.trim(),
-    payment: payVal(), location: picked, zoneFree,
+    payment: payVal(), location: picked, zoneFree, note: $("note").value.trim(), lang,
     items: Object.keys(cart).map(k => ({ id: k, name: itemById(k).name, qty: cart[k] }))
   };
-  m.textContent = "Yuborilmoqda..."; btn.disabled = true;
+  m.textContent = t("sending"); btn.disabled = true;
   try {
     const res = await fetch(`${BACKEND_URL}/api/order`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (data.status !== "ok") { m.textContent = "❌ " + (data.message || "Xatolik yuz berdi."); return; }
+    if (data.status !== "ok") { m.textContent = t("m_err"); return; }
     for (const k in cart) delete cart[k];
+    $("note").value = "";
     renderCart(); m.textContent = ""; toggleCart(false);
     localStorage.setItem("gf_order", data.orderId);
     localStorage.setItem("gf_link", data.botLink);
-    $("trackNote").innerHTML = payHTML(body.payment); $("trackNote").classList.remove("hidden");
+    lastPay = body.payment; $("trackNote").innerHTML = payHTML(lastPay); $("trackNote").classList.remove("hidden");
     trackOrder(data.orderId, true);
   } catch (err) {
-    m.textContent = "❌ Backend bilan aloqa yo'q, 1 daqiqadan keyin qayta urinib ko'ring.";
+    m.textContent = t("m_noconn");
   } finally { btn.disabled = false; }
 }
 
 function renderExtras() {
   $("promos").classList.remove("hidden"); $("navPromos").classList.remove("hidden");
   $("promoList").innerHTML = PROMOS.length
-    ? PROMOS.map(p => `<div class="card rounded-3xl p-5"><h3 class="text-lg font-bold" style="color:var(--gold)">🔥 ${p.title}</h3><p class="mt-2 text-sm text-zinc-300">${p.text}</p></div>`).join("")
-    : `<p class="sm:col-span-2 lg:col-span-3 text-center text-zinc-400">Hozircha aksiyalar yo'q. Tez orada yangi takliflar bilan qaytamiz! 🔥</p>`;
+    ? PROMOS.map(p => `<div class="card rounded-3xl p-5"><h3 class="text-lg font-bold" style="color:var(--gold)">🔥 ${ml(p.title)}</h3><p class="mt-2 text-sm text-zinc-300">${ml(p.text)}</p></div>`).join("")
+    : `<p class="sm:col-span-2 lg:col-span-3 text-center text-zinc-400">${t("promos_empty")}</p>`;
   const l = [];
   if (SOCIAL.instagram) l.push(`<a href="${SOCIAL.instagram}" target="_blank" rel="noopener" class="btn rounded-full px-6 py-2 font-semibold">📸 Instagram</a>`);
   if (SOCIAL.telegram) l.push(`<a href="${SOCIAL.telegram}" target="_blank" rel="noopener" class="btn btn-gold rounded-full px-6 py-2 font-semibold">✈️ Telegram</a>`);
   $("socials").innerHTML = l.join("");
   if (ADDRESS.text) {
     $("addrLine").classList.remove("hidden");
-    $("addrLine").innerHTML = `📍 ${ADDRESS.text}` + (ADDRESS.lat ? ` <a class="underline" style="color:var(--gold)" target="_blank" rel="noopener" href="${ADDRESS.url || `https://www.google.com/maps?q=${ADDRESS.lat},${ADDRESS.lng}`}">Xaritada ochish</a>` : "");
+    $("addrLine").innerHTML = `📍 ${ml(ADDRESS.text)}` + (ADDRESS.lat ? ` <a class="underline" style="color:var(--gold)" target="_blank" rel="noopener" href="${ADDRESS.url || `https://www.google.com/maps?q=${ADDRESS.lat},${ADDRESS.lng}`}">${t("map_open")}</a>` : "");
   }
   if (!CARD.number) $("payCardLbl").classList.add("hidden");
 }
@@ -321,14 +343,18 @@ function setPoint(lat, lng) {
   picked = { lat, lng };
   if (marker) marker.setLatLng([lat, lng]); else marker = L.marker([lat, lng]).addTo(map);
   $("locState").textContent = "✓";
+  zoneFree = FREE_ZONES.length ? FREE_ZONES.some(z => inPoly(lat, lng, z)) : null;
+  showDelivery();
+}
+function showDelivery() {
   const info = $("deliveryInfo");
-  if (!FREE_ZONES.length) { zoneFree = null; info.className = "text-sm text-zinc-300"; info.textContent = "Yetkazib berish narxi operator tomonidan aytiladi."; return; }
-  zoneFree = FREE_ZONES.some(z => inPoly(lat, lng, z));
+  if (!picked) { info.textContent = ""; return; }
+  if (zoneFree === null) { info.className = "text-sm text-zinc-300"; info.textContent = t("del_ask"); return; }
   info.className = "text-sm font-semibold " + (zoneFree ? "text-green-400" : "text-yellow-300");
-  info.textContent = zoneFree ? "🚚 Yetkazib berish BEPUL" : "🚚 Hududdan tashqarida: yetkazib berish pullik" + (OUTSIDE_FEE ? ` (${fmt(OUTSIDE_FEE)}, alohida to'lanadi)` : ", summasi alohida to'lanadi");
+  info.textContent = zoneFree ? t("del_free") : t("del_paid", OUTSIDE_FEE ? fmt(OUTSIDE_FEE) : "");
 }
 function toggleMap() {
-  if (!window.L) { $("deliveryInfo").textContent = "Xarita yuklanmadi, sahifani yangilang."; return; }
+  if (!window.L) { $("deliveryInfo").textContent = t("map_fail"); return; }
   const b = $("mapBox"); b.classList.toggle("hidden");
   if (b.classList.contains("hidden")) return;
   if (!map) {
@@ -344,16 +370,16 @@ function useMyLocation() {
   if (!map || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(
     p => { setPoint(p.coords.latitude, p.coords.longitude); map.setView([p.coords.latitude, p.coords.longitude], 16); },
-    () => { $("deliveryInfo").textContent = "Joylashuvni aniqlab bo'lmadi, xaritadan belgilang."; });
+    () => { $("deliveryInfo").textContent = t("geo_fail"); });
 }
 
 // ---- To'lov turi ----
 const payVal = () => (document.querySelector("input[name=pay]:checked") || {}).value;
 function payHTML(v) {
-  const tg = SOCIAL.telegram ? `: <a class="underline text-yellow-300" target="_blank" href="${SOCIAL.telegram}">Telegram'ga yozish</a>` : ".";
+  const tg = SOCIAL.telegram ? `: <a class="underline text-yellow-300" target="_blank" href="${SOCIAL.telegram}">${t("tg_write")}</a>` : ".";
   return v === "card"
-    ? `💳 Karta: <b class="select-all">${CARD.number}</b><br>Egasi: <b>${CARD.owner}</b><br>To'lovni o'tkazgach, chekni Telegram orqali yuboring${tg}`
-    : "💵 Buyurtma yetib kelganda kuryerga naqd to'laysiz.";
+    ? `💳 ${t("card_lbl")}: <b class="select-all">${CARD.number}</b><br>${t("owner")}: <b>${CARD.owner}</b><br>${t("card_after")}${tg}`
+    : t("cash_info");
 }
 function setPay() {
   const v = payVal(), box = $("payInfo");
@@ -362,33 +388,71 @@ function setPay() {
   if (v) box.innerHTML = payHTML(v);
 }
 
-let trackRef = null;
+// ---- Baholash ----
+let stars = 0, reviewOrder = null;
+function drawStars() {
+  $("stars").innerHTML = [1, 2, 3, 4, 5].map(n => `<button type="button" onclick="setStars(${n})" class="${n <= stars ? "text-yellow-400" : "text-zinc-600"}" aria-label="${n}">★</button>`).join("");
+}
+function setStars(n) { stars = n; drawStars(); }
+async function sendReview() {
+  const m = $("reviewMsg"), btn = $("reviewBtn");
+  if (!stars) { m.textContent = t("rv_pick"); return; }
+  btn.disabled = true; m.textContent = t("sending");
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/review`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: reviewOrder, rating: stars, comment: $("reviewText").value.trim() }) });
+    const d = await res.json();
+    if (d.status !== "ok") { m.textContent = t("rv_err"); btn.disabled = false; return; }
+    m.textContent = t("rv_thanks");
+    localStorage.removeItem("gf_order");
+    setTimeout(() => $("reviewBox").classList.add("hidden"), 2500);
+  } catch (e) { m.textContent = t("rv_noconn"); btn.disabled = false; }
+}
+function closeReview() { $("reviewBox").classList.add("hidden"); localStorage.removeItem("gf_order"); }
+
+let trackRef = null, trackId = null, trackKey = null, trackRaw = "", lastPay = null;
+function renderTrack() {
+  if (!trackId) return;
+  const el = $("track-status"), k = trackKey, raw = trackRaw;
+  el.textContent = k ? t("st_" + k) : raw;
+  $("confirmBox").classList.toggle("hidden", !(k === "unconfirmed" || raw.includes("tasdiqlang")));
+  if (k === "cancelled" || raw.includes("Bekor qilindi")) el.className = "text-2xl font-extrabold text-red-500 animate-bounce";
+  else if (k === "done" || raw.includes("Yetkazib berildi")) el.className = "text-2xl font-extrabold text-green-400";
+  else el.className = "text-2xl font-extrabold text-yellow-400 animate-pulse";
+}
 function trackOrder(orderId, scroll) {
   $("tracker-section").classList.remove("hidden");
   $("track-id").textContent = "#" + orderId;
-  if (scroll) $("tracker-section").scrollIntoView({ behavior: "smooth" });
   $("confirmLink").href = localStorage.getItem("gf_link") || "#";
-  if (!db) { $("track-status").textContent = "Holatni yuklab bo'lmadi, sahifani yangilang"; return; }
+  if (scroll) $("tracker-section").scrollIntoView({ behavior: "smooth" });
+  trackId = orderId;
+  if (!db) { $("track-status").textContent = t("trk_fail"); return; }
   if (trackRef) trackRef.off();
-  trackRef = db.ref("orders/" + orderId + "/status");
-  trackRef.on("value", snapshot => {
-    if (!snapshot.exists()) return;
-    const s = snapshot.val(), el = $("track-status");
-    el.textContent = s;
-    $("confirmBox").classList.toggle("hidden", !s.includes("tasdiqlang"));
-    if (s.includes("Bekor qilindi")) {
-      el.className = "text-2xl font-extrabold text-red-500 animate-bounce";
-      localStorage.removeItem("gf_order");
-    } else if (s.includes("Yetkazib berildi")) {
-      el.className = "text-2xl font-extrabold text-green-400";
-      localStorage.removeItem("gf_order");
-    } else {
-      el.className = "text-2xl font-extrabold text-yellow-400 animate-pulse";
+  trackRef = db.ref("orders/" + orderId);
+  trackRef.on("value", snap => {
+    const v = snap.val();
+    if (!v) return;
+    trackKey = v.statusKey || null; trackRaw = v.status || "";
+    renderTrack();
+    if (trackKey === "cancelled") localStorage.removeItem("gf_order");
+    if ((trackKey === "done" || trackRaw.includes("Yetkazib berildi")) && $("reviewBox").classList.contains("hidden")) {
+      reviewOrder = orderId; stars = 0; drawStars(); $("reviewBox").classList.remove("hidden");
     }
   });
 }
 
-renderExtras(); setMenu(Object.keys(MENU), BUILTIN); startMenuSync();
+// ---- Tilni qo'llash ----
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.title = t("title");
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => { e.placeholder = t(e.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(e => e.setAttribute("aria-label", t(e.dataset.i18nAria)));
+  $("langSel").value = lang;
+  renderFilters(); renderGrid(); renderCart(); renderExtras(); showDelivery(); setPay(); renderTrack(); drawStars();
+  if (lastPay) $("trackNote").innerHTML = payHTML(lastPay);
+}
+function setLang(l) { if (!LANGS.includes(l)) return; lang = l; localStorage.setItem("gf_lang", l); applyLang(); }
+setMenu(Object.keys(MENU), BUILTIN); startMenuSync(); applyLang();
 const activeOrder = localStorage.getItem("gf_order"); if (activeOrder) trackOrder(activeOrder);
 </script>
 </body>
