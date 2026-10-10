@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uz"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Garden Food — Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>body{background:#0a0a0c;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+input,select,textarea{background:#151519;border:1px solid #2c2c33;border-radius:8px;padding:6px 8px;color:#fff;width:100%}
+.b{background:linear-gradient(135deg,#E52B50,#DC2626);border-radius:8px;padding:6px 12px;font-weight:600}.g{background:#27272a;border-radius:8px;padding:6px 12px}</style></head>
+<body class="p-4 max-w-6xl mx-auto">
+<div id="login" class="max-w-sm mx-auto mt-24 space-y-3">
+  <h1 class="text-2xl font-extrabold text-center">Garden <span style="color:#FBBF24">Food</span> · Admin</h1>
+  <input id="pw" type="password" placeholder="Parol" onkeydown="if(event.key==='Enter')login()">
+  <button class="b w-full" onclick="login()">Kirish</button>
+  <p id="lmsg" class="text-sm text-yellow-300 text-center"></p>
+</div>
+<div id="app" class="hidden space-y-5">
+  <div class="flex justify-between items-center"><h1 class="text-2xl font-extrabold">Menyu boshqaruvi</h1><button class="g" onclick="logout()">Chiqish</button></div>
+  <p id="msg" class="min-h-[1.25rem] text-sm"></p>
+  <div id="seedBox" class="hidden rounded-xl border border-yellow-500/40 p-3 text-sm">Menyu hali bazaga yuklanmagan. <button class="b ml-2" onclick="seed()">Hozirgi menyuni yuklash</button></div>
+  <div class="rounded-xl border border-zinc-800 p-3">
+    <h2 class="font-bold mb-2">Kategoriyalar <span class="text-xs text-zinc-400">(har biri alohida qatorda; tartibi saytdagi tartib)</span></h2>
+    <textarea id="cats" rows="6"></textarea>
+    <button class="b mt-2" onclick="saveCats()">Kategoriyalarni saqlash</button>
+  </div>
+  <div class="overflow-x-auto"><table class="w-full text-sm min-w-[860px]">
+    <thead class="text-left text-zinc-400"><tr><th>Nomi</th><th>Narxi (so'm)</th><th>Kategoriya</th><th>Rasm (yo'l yoki havola)</th><th>Sotuvda</th><th></th></tr></thead>
+    <tbody id="rows"></tbody></table></div>
+</div>
+<script>
+const API = "https://gardenfood-backend.onrender.com";
+let T = sessionStorage.getItem("adm"), M = { categories: [], items: {} };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+const say = (t, bad) => { $("msg").textContent = t; $("msg").className = "min-h-[1.25rem] text-sm " + (bad ? "text-red-400" : "text-green-400"); };
+async function call(method, path, body) {
+  const r = await fetch(API + path, { method, headers: { "Content-Type": "application/json", Authorization: "Bearer " + T }, body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401) { logout(); throw new Error("Seans tugadi, qayta kiring"); }
+  const d = await r.json();
+  if (d.status !== "ok") throw new Error(d.message || "Xatolik");
+  return d;
+}
+async function login() {
+  $("lmsg").textContent = "Tekshirilmoqda...";
+  try {
+    const r = await fetch(API + "/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("pw").value }) });
+    const d = await r.json();
+    if (d.status !== "ok") { $("lmsg").textContent = d.message; return; }
+    T = d.token; sessionStorage.setItem("adm", T); load();
+  } catch (e) { $("lmsg").textContent = "Backend bilan aloqa yo'q (1 daqiqadan keyin urinib ko'ring)"; }
+}
+function logout() { sessionStorage.removeItem("adm"); T = null; $("app").classList.add("hidden"); $("login").classList.remove("hidden"); }
+async function load() {
+  try {
+    M = (await call("GET", "/api/admin/menu")).menu || {};
+    M.categories = M.categories || []; M.items = M.items || {};
+    $("login").classList.add("hidden"); $("app").classList.remove("hidden"); render();
+  } catch (e) { $("lmsg").textContent = e.message; }
+}
+const row = (id, it, cls = "") => `<tr data-id="${id}" class="border-t border-zinc-800 ${cls}">
+  <td class="pr-2 py-1"><input data-k="name" value="${esc(it.name)}" placeholder="${id ? "" : "Yangi taom nomi"}"></td>
+  <td class="pr-2 w-32"><input data-k="price" type="number" min="0" value="${esc(it.price)}"></td>
+  <td class="pr-2 w-44"><select data-k="category">${M.categories.map(c => `<option ${c === it.category ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></td>
+  <td class="pr-2"><input data-k="img" value="${esc(it.img || "")}" placeholder="images/fayl.jpg yoki https://..."></td>
+  <td class="text-center"><input data-k="available" type="checkbox" ${it.available !== false ? "checked" : ""} style="width:20px;height:20px"></td>
+  <td class="whitespace-nowrap pl-2"><button class="b" onclick="saveRow(this)">${id ? "Saqlash" : "Qo'shish"}</button>${id ? ` <button class="g" onclick="delRow(this)">🗑</button>` : ""}</td></tr>`;
+function render() {
+  $("seedBox").classList.toggle("hidden", Object.keys(M.items).length > 0);
+  $("cats").value = M.categories.join("\n");
+  const order = Object.fromEntries(M.categories.map((c, n) => [c, n]));
+  const list = Object.entries(M.items).sort((a, b) => (order[a[1].category] ?? 99) - (order[b[1].category] ?? 99) || (a[1].sort || 0) - (b[1].sort || 0));
+  $("rows").innerHTML = row("", { name: "", price: "", category: M.categories[0], img: "", available: true }, "bg-zinc-900") + list.map(([id, it]) => row(id, it)).join("");
+}
+async function saveRow(btn) {
+  const tr = btn.closest("tr"), id = tr.dataset.id, g = k => tr.querySelector(`[data-k=${k}]`);
+  const body = { name: g("name").value, price: g("price").value, category: g("category").value, img: g("img").value, available: g("available").checked };
+  try { await call(id ? "PUT" : "POST", "/api/admin/item" + (id ? "/" + id : ""), body); await load(); say(id ? "✅ Saqlandi" : "✅ Taom qo'shildi"); }
+  catch (e) { say("❌ " + e.message + (M.categories.length ? "" : " (avval menyuni yuklang yoki kategoriya qo'shing)"), true); }
+}
+async function delRow(btn) {
+  const tr = btn.closest("tr");
+  if (!confirm(`"${tr.querySelector("[data-k=name]").value}" o'chirilsinmi?`)) return;
+  try { await call("DELETE", "/api/admin/item/" + tr.dataset.id); await load(); say("🗑 O'chirildi"); } catch (e) { say("❌ " + e.message, true); }
+}
+async function saveCats() {
+  try { await call("PUT", "/api/admin/categories", { categories: $("cats").value.split("\n") }); await load(); say("✅ Kategoriyalar saqlandi"); } catch (e) { say("❌ " + e.message, true); }
+}
+async function seed() {
+  try { await call("POST", "/api/admin/seed", {}); await load(); say("✅ Menyu yuklandi"); } catch (e) { say("❌ " + e.message, true); }
+}
+if (T) load();
+</script></body></html>
